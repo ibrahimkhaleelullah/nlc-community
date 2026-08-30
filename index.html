@@ -9,7 +9,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-
     * { box-sizing: border-box; }
     body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #f3f6f5; color: #17211e; }
     .topbar { background: white; border-bottom: 1px solid #e3e9e6; position: sticky; top: 0; z-index: 10; }
@@ -183,9 +182,9 @@
             <input id="profileEmail" class="profile-input" type="email" readonly>
             <div class="profile-note">Your email is linked to your account and cannot be changed here.</div>
             <label class="profile-label" for="profileName">Full Name</label>
-            <input id="profileName" class="profile-input" type="text" maxlength="80" placeholder="Your full name">
+            <input id="profileName" class="profile-input" type="text" maxlength="80" placeholder="Your full name" oninput="saveProfileDraft()">
             <label class="profile-label" for="profileBio">Bio <span style="font-weight:400;">(optional)</span></label>
-            <textarea id="profileBio" class="profile-textarea" maxlength="300" placeholder="Tell the community a little about yourself..."></textarea>
+            <textarea id="profileBio" class="profile-textarea" maxlength="300" placeholder="Tell the community a little about yourself..." oninput="saveProfileDraft()"></textarea>
             <div class="profile-actions">
               <div id="profileMessage" class="profile-message"></div>
               <button type="button" id="profileSaveButton" class="profile-save-button" onclick="saveProfile()">Save Profile</button>
@@ -273,9 +272,7 @@
       if (password.length < 6) { setAuthMessage('Your password must be at least 6 characters.', true); passwordInput.focus(); return; }
       button.disabled = true; button.textContent = 'Creating Account...'; setAuthMessage('');
       const { data, error } = await supabaseClient.auth.signUp({ email, password, options: { data: { full_name: name } } });
-      if (error) {
-        console.error('Sign up error:', error); setAuthMessage(error.message, true); button.disabled = false; button.textContent = 'Create Account'; return;
-      }
+      if (error) { console.error('Sign up error:', error); setAuthMessage(error.message, true); button.disabled = false; button.textContent = 'Create Account'; return; }
       button.disabled = false; button.textContent = 'Create Account';
       if (data.user && !data.session) { setAuthMessage('Account created. Please check your email and confirm your address before signing in.'); return; }
       setAuthMessage('Account created successfully.');
@@ -285,7 +282,8 @@
       const emailInput = document.getElementById('loginEmail');
       const passwordInput = document.getElementById('loginPassword');
       const button = document.getElementById('loginButton');
-      const email = emailInput.value.trim(); const password = passwordInput.value;
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
       if (!email) { setAuthMessage('Please enter your email address.', true); emailInput.focus(); return; }
       if (!password) { setAuthMessage('Please enter your password.', true); passwordInput.focus(); return; }
       button.disabled = true; button.textContent = 'Signing In...'; setAuthMessage('');
@@ -296,6 +294,7 @@
     }
 
     async function signOut() {
+      if (currentUser) localStorage.removeItem(profileDraftKey(currentUser.id));
       const { error } = await supabaseClient.auth.signOut();
       if (error) { console.error('Sign out error:', error); alert('Unable to sign out.\n\n' + error.message); return; }
       currentUser = null; currentProfile = null; updateAuthUI(null);
@@ -316,6 +315,46 @@
       return metadata.full_name || metadata.name || user.email?.split('@')[0] || 'Community Member';
     }
 
+    function profileDraftKey(userId) {
+      return `nlc-profile-draft-${userId}`;
+    }
+
+    function getProfileDraft() {
+      if (!currentUser) return null;
+      try {
+        const raw = localStorage.getItem(profileDraftKey(currentUser.id));
+        return raw ? JSON.parse(raw) : null;
+      } catch (error) {
+        console.warn('Unable to read profile draft:', error);
+        return null;
+      }
+    }
+
+    function saveProfileDraft() {
+      if (!currentUser) return;
+      const nameInput = document.getElementById('profileName');
+      const bioInput = document.getElementById('profileBio');
+      if (!nameInput || !bioInput) return;
+      const draft = { full_name: nameInput.value, bio: bioInput.value };
+      try {
+        localStorage.setItem(profileDraftKey(currentUser.id), JSON.stringify(draft));
+      } catch (error) {
+        console.warn('Unable to save profile draft:', error);
+      }
+    }
+
+    function populateProfileEditor() {
+      if (!currentUser) return;
+      const emailInput = document.getElementById('profileEmail');
+      const nameInput = document.getElementById('profileName');
+      const bioInput = document.getElementById('profileBio');
+      const draft = getProfileDraft();
+      if (emailInput) emailInput.value = currentUser.email || '';
+      if (nameInput) nameInput.value = draft?.full_name ?? currentProfile?.full_name ?? getUserName(currentUser);
+      if (bioInput) bioInput.value = draft?.bio ?? currentProfile?.bio ?? '';
+      setProfileMessage('');
+    }
+
     function toggleProfileEditor() {
       const editor = document.getElementById('profileEditor');
       const button = document.getElementById('profileToggleButton');
@@ -323,12 +362,7 @@
       const isOpen = editor.style.display !== 'none';
       editor.style.display = isOpen ? 'none' : 'block';
       button.textContent = isOpen ? 'My Profile' : 'Hide Profile';
-      // Do not repopulate the fields when reopening the editor.
-      // This preserves any unsaved name/bio the member has typed.
-      if (!isOpen) {
-        const emailInput = document.getElementById('profileEmail');
-        if (emailInput && currentUser && !emailInput.value) emailInput.value = currentUser.email || '';
-      }
+      if (!isOpen) populateProfileEditor();
     }
 
     function setProfileMessage(message, isError = false) {
@@ -338,28 +372,19 @@
       element.classList.toggle('error', isError);
     }
 
-    function populateProfileEditor() {
-      if (!currentUser) return;
-      const emailInput = document.getElementById('profileEmail');
-      const nameInput = document.getElementById('profileName');
-      const bioInput = document.getElementById('profileBio');
-      if (emailInput) emailInput.value = currentUser.email || '';
-      if (nameInput) nameInput.value = currentProfile?.full_name || getUserName(currentUser);
-      if (bioInput) bioInput.value = currentProfile?.bio || '';
-      setProfileMessage('');
-    }
-
     async function saveProfile() {
       if (!currentUser) { setProfileMessage('Please sign in first.', true); return; }
       const nameInput = document.getElementById('profileName');
       const bioInput = document.getElementById('profileBio');
       const button = document.getElementById('profileSaveButton');
-      const name = nameInput.value.trim(); const bio = bioInput.value.trim();
+      const name = nameInput.value.trim();
+      const bio = bioInput.value.trim();
       if (!name) { setProfileMessage('Please enter your full name.', true); nameInput.focus(); return; }
       button.disabled = true; button.textContent = 'Saving...'; setProfileMessage('');
       const { data, error } = await supabaseClient.from('profiles').update({ full_name: name, bio: bio || null, updated_at: new Date().toISOString() }).eq('id', currentUser.id).select('id, full_name, bio, avatar_url').single();
       if (error) { console.error('Profile update error:', error); setProfileMessage('Unable to save your profile: ' + error.message, true); button.disabled = false; button.textContent = 'Save Profile'; return; }
       currentProfile = data;
+      localStorage.removeItem(profileDraftKey(currentUser.id));
       document.getElementById('currentUserName').textContent = getUserName(currentUser);
       document.getElementById('authorName').value = getUserName(currentUser);
       setProfileMessage('Profile saved successfully.');
@@ -376,35 +401,52 @@
       const likeButtons = document.querySelectorAll('.like-button');
       if (user) {
         const name = getUserName(user);
-        loggedOut.style.display = 'none'; loggedIn.style.display = 'block';
+        loggedOut.style.display = 'none';
+        loggedIn.style.display = 'block';
         document.getElementById('currentUserName').textContent = name;
-        const profileEmail = document.getElementById('profileEmail'); if (profileEmail) profileEmail.value = user.email || '';
-        const profileName = document.getElementById('profileName'); if (profileName) profileName.value = currentProfile?.full_name || name;
-        const profileBio = document.getElementById('profileBio'); if (profileBio) profileBio.value = currentProfile?.bio || '';
-        composer.style.display = 'block'; nameInput.value = name; nameInput.readOnly = true;
-        document.getElementById('postContent').disabled = false; document.getElementById('postButton').disabled = false;
-        commentInputs.forEach(input => input.disabled = false); commentButtons.forEach(button => button.disabled = false); likeButtons.forEach(button => button.disabled = false);
+        populateProfileEditor();
+        composer.style.display = 'block';
+        nameInput.value = name;
+        nameInput.readOnly = true;
+        document.getElementById('postContent').disabled = false;
+        document.getElementById('postButton').disabled = false;
+        commentInputs.forEach(input => input.disabled = false);
+        commentButtons.forEach(button => button.disabled = false);
+        likeButtons.forEach(button => button.disabled = false);
       } else {
-        loggedOut.style.display = 'block'; loggedIn.style.display = 'none'; composer.style.display = 'none';
-        const profileEditor = document.getElementById('profileEditor'); const profileToggleButton = document.getElementById('profileToggleButton');
-        if (profileEditor) profileEditor.style.display = 'none'; if (profileToggleButton) profileToggleButton.textContent = 'My Profile';
-        commentInputs.forEach(input => input.disabled = true); commentButtons.forEach(button => button.disabled = true); likeButtons.forEach(button => button.disabled = true);
+        loggedOut.style.display = 'block';
+        loggedIn.style.display = 'none';
+        composer.style.display = 'none';
+        const profileEditor = document.getElementById('profileEditor');
+        const profileToggleButton = document.getElementById('profileToggleButton');
+        if (profileEditor) profileEditor.style.display = 'none';
+        if (profileToggleButton) profileToggleButton.textContent = 'My Profile';
+        commentInputs.forEach(input => input.disabled = true);
+        commentButtons.forEach(button => button.disabled = true);
+        likeButtons.forEach(button => button.disabled = true);
       }
     }
 
-    async function handleUserSession(user) { currentUser = user; await loadCurrentProfile(user); updateAuthUI(user); await refreshLikeStates(); }
+    async function handleUserSession(user) {
+      currentUser = user;
+      await loadCurrentProfile(user);
+      updateAuthUI(user);
+      await refreshLikeStates();
+    }
 
     async function initializeAuth() {
       const { data, error } = await supabaseClient.auth.getSession();
       if (error) { console.error('Session error:', error); updateAuthUI(null); return; }
       currentUser = data.session ? data.session.user : null;
-      await loadCurrentProfile(currentUser); updateAuthUI(currentUser);
+      await loadCurrentProfile(currentUser);
+      updateAuthUI(currentUser);
       if (currentUser) await refreshLikeStates();
     }
 
     supabaseClient.auth.onAuthStateChange(async function(event, session) {
       currentUser = session ? session.user : null;
-      await loadCurrentProfile(currentUser); updateAuthUI(currentUser);
+      await loadCurrentProfile(currentUser);
+      updateAuthUI(currentUser);
       if (currentUser) await refreshLikeStates();
     });
 
@@ -422,45 +464,70 @@
       if (!data || data.length === 0) { postsContainer.innerHTML = '<div class="empty-state">No posts yet. Be the first to share something!</div>'; return; }
       let html = '';
       for (const post of data) {
-        const authorName = post.author_name || 'Community Member'; const initials = getInitials(authorName);
+        const authorName = post.author_name || 'Community Member';
+        const initials = getInitials(authorName);
         html += `<article class="post"><div class="post-author"><div class="author-avatar">${escapeHtml(initials)}</div><div class="author-info"><div class="author-name">${escapeHtml(authorName)}</div><div class="author-role">Community member</div></div></div><div class="post-content">${escapeHtml(post.content)}</div><div class="post-date">${new Date(post.created_at).toLocaleString()}</div><div class="post-actions"><button class="like-button" id="like-button-${post.id}" type="button" onclick="likePost('${post.id}')">❤️ Like <span id="like-count-${post.id}">0</span></button></div><div class="comments"><div class="comments-title" id="comments-title-${post.id}">Comments</div><div id="comments-${post.id}">Loading comments...</div><div class="comment-box"><input id="comment-${post.id}" type="text" maxlength="500" placeholder="Write a comment..." onkeydown="handleCommentKey(event, '${post.id}')"><button type="button" class="comment-button" id="comment-button-${post.id}" data-post-id="${post.id}">Comment</button></div></div></article>`;
       }
       postsContainer.innerHTML = html;
       for (const post of data) { loadLikeCount(post.id); loadComments(post.id); }
-      updateAuthUI(currentUser); if (currentUser) await refreshLikeStates();
+      updateAuthUI(currentUser);
+      if (currentUser) await refreshLikeStates();
     }
 
     async function createPost() {
       if (!currentUser) { setMessage('Please sign in before creating a post.', true); return; }
-      const textarea = document.getElementById('postContent'); const button = document.getElementById('postButton'); const content = textarea.value.trim(); const authorName = getUserName(currentUser);
+      const textarea = document.getElementById('postContent');
+      const button = document.getElementById('postButton');
+      const content = textarea.value.trim();
+      const authorName = getUserName(currentUser);
       if (!content) { setMessage('Please write something first.', true); textarea.focus(); return; }
-      button.disabled = true; setMessage('Posting...');
+      button.disabled = true;
+      setMessage('Posting...');
       const { error } = await supabaseClient.from('posts').insert([{ content, author_name: authorName, user_id: currentUser.id }]);
       if (error) { console.error('Post creation error:', error); setMessage('Unable to create post: ' + error.message, true); button.disabled = false; return; }
-      textarea.value = ''; setMessage('Posted!'); button.disabled = false; await loadPosts();
+      textarea.value = '';
+      setMessage('Posted!');
+      button.disabled = false;
+      await loadPosts();
     }
 
     async function loadComments(postId) {
-      const container = document.getElementById(`comments-${postId}`); if (!container) return;
+      const container = document.getElementById(`comments-${postId}`);
+      if (!container) return;
       const { data, error } = await supabaseClient.from('comments').select('*').eq('post_id', postId).order('created_at', { ascending: true });
       if (error) { console.error('Comment loading error:', error); container.innerHTML = '<div class="no-comments">Unable to load comments.</div>'; return; }
-      const commentCount = data ? data.length : 0; const title = document.getElementById(`comments-title-${postId}`); if (title) title.textContent = `💬 ${commentCount} Comment${commentCount === 1 ? '' : 's'}`;
+      const commentCount = data ? data.length : 0;
+      const title = document.getElementById(`comments-title-${postId}`);
+      if (title) title.textContent = `💬 ${commentCount} Comment${commentCount === 1 ? '' : 's'}`;
       if (!data || data.length === 0) { container.innerHTML = '<div class="no-comments">No comments yet.</div>'; return; }
-      container.innerHTML = data.map(comment => { const commentAuthor = comment.author_name || 'Community Member'; const initials = getInitials(commentAuthor); return `<div class="comment"><div class="comment-author"><div class="comment-avatar">${escapeHtml(initials)}</div><div class="comment-author-name">${escapeHtml(commentAuthor)}</div></div><div class="comment-content">${escapeHtml(comment.content)}</div><div class="comment-date">${new Date(comment.created_at).toLocaleString()}</div></div>`; }).join('');
+      container.innerHTML = data.map(comment => {
+        const commentAuthor = comment.author_name || 'Community Member';
+        const initials = getInitials(commentAuthor);
+        return `<div class="comment"><div class="comment-author"><div class="comment-avatar">${escapeHtml(initials)}</div><div class="comment-author-name">${escapeHtml(commentAuthor)}</div></div><div class="comment-content">${escapeHtml(comment.content)}</div><div class="comment-date">${new Date(comment.created_at).toLocaleString()}</div></div>`;
+      }).join('');
     }
 
     async function createComment(postId) {
       if (!currentUser) { alert('Please sign in before commenting.'); return; }
-      const input = document.getElementById(`comment-${postId}`); const button = document.getElementById(`comment-button-${postId}`); if (!input || !button) return;
-      const content = input.value.trim(); if (!content) return; const authorName = getUserName(currentUser);
-      button.disabled = true; button.textContent = 'Adding...';
+      const input = document.getElementById(`comment-${postId}`);
+      const button = document.getElementById(`comment-button-${postId}`);
+      if (!input || !button) return;
+      const content = input.value.trim();
+      if (!content) return;
+      const authorName = getUserName(currentUser);
+      button.disabled = true;
+      button.textContent = 'Adding...';
       const { error } = await supabaseClient.from('comments').insert([{ post_id: postId, content, author_name: authorName, user_id: currentUser.id }]);
       if (error) { console.error('Comment creation error:', error); alert('Comment could not be added.\n\n' + error.message); button.disabled = false; button.textContent = 'Comment'; return; }
-      input.value = ''; button.disabled = false; button.textContent = 'Comment'; await loadComments(postId);
+      input.value = '';
+      button.disabled = false;
+      button.textContent = 'Comment';
+      await loadComments(postId);
     }
 
     async function loadLikeCount(postId) {
-      const countElement = document.getElementById(`like-count-${postId}`); if (!countElement) return;
+      const countElement = document.getElementById(`like-count-${postId}`);
+      if (!countElement) return;
       const { count, error } = await supabaseClient.from('likes').select('*', { count: 'exact', head: true }).eq('post_id', postId);
       if (error) { console.error('Like count error:', error); countElement.textContent = '0'; return; }
       countElement.textContent = count || 0;
@@ -468,26 +535,42 @@
 
     async function likePost(postId) {
       if (!currentUser) { alert('Please sign in before liking a post.'); return; }
-      const button = document.getElementById(`like-button-${postId}`); if (!button) return; button.disabled = true;
+      const button = document.getElementById(`like-button-${postId}`);
+      if (!button) return;
+      button.disabled = true;
       const { error } = await supabaseClient.from('likes').insert([{ post_id: postId, user_id: currentUser.id }]);
       if (error) {
         console.error('Like error:', error);
         if (error.code === '23505') { button.classList.add('liked'); button.innerHTML = '❤️ Liked ' + `<span id="like-count-${postId}"></span>`; await loadLikeCount(postId); return; }
-        alert('Unable to like this post.\n\n' + error.message); button.disabled = false; return;
+        alert('Unable to like this post.\n\n' + error.message);
+        button.disabled = false;
+        return;
       }
-      button.classList.add('liked'); button.innerHTML = '❤️ Liked ' + `<span id="like-count-${postId}"></span>`; await loadLikeCount(postId);
+      button.classList.add('liked');
+      button.innerHTML = '❤️ Liked ' + `<span id="like-count-${postId}"></span>`;
+      await loadLikeCount(postId);
     }
 
     async function checkIfLiked(postId) {
-      if (!currentUser) return; const button = document.getElementById(`like-button-${postId}`); if (!button) return;
+      if (!currentUser) return;
+      const button = document.getElementById(`like-button-${postId}`);
+      if (!button) return;
       const { data, error } = await supabaseClient.from('likes').select('id').eq('post_id', postId).eq('user_id', currentUser.id).maybeSingle();
       if (error) { console.error('Check like error:', error); return; }
-      if (data) { button.classList.add('liked'); button.innerHTML = '❤️ Liked ' + `<span id="like-count-${postId}"></span>`; button.disabled = true; }
+      if (data) {
+        button.classList.add('liked');
+        button.innerHTML = '❤️ Liked ' + `<span id="like-count-${postId}"></span>`;
+        button.disabled = true;
+      }
     }
 
     async function refreshLikeStates() {
-      if (!currentUser) return; const buttons = document.querySelectorAll('.like-button');
-      for (const button of buttons) { const match = button.id.match(/^like-button-(.+)$/); if (match) await checkIfLiked(match[1]); }
+      if (!currentUser) return;
+      const buttons = document.querySelectorAll('.like-button');
+      for (const button of buttons) {
+        const match = button.id.match(/^like-button-(.+)$/);
+        if (match) await checkIfLiked(match[1]);
+      }
     }
 
     function handleCommentKey(event, postId) {
@@ -495,12 +578,22 @@
     }
 
     document.addEventListener('click', function(event) {
-      const button = event.target.closest('.comment-button'); if (!button) return; createComment(button.dataset.postId);
+      const button = event.target.closest('.comment-button');
+      if (!button) return;
+      createComment(button.dataset.postId);
     });
 
-    function escapeHtml(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
 
-    async function startApp() { await initializeAuth(); await loadPosts(); }
+    async function startApp() {
+      await initializeAuth();
+      await loadPosts();
+    }
+
     startApp();
   </script>
 </body>
