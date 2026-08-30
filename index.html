@@ -312,14 +312,15 @@
                   onkeydown="handleCommentKey(event, '${post.id}')"
                 >
 
-<button
-  type="button"
-  class="comment-button"
-  data-post-id="${post.id}">
+                <button
+                  type="button"
+                  class="comment-button"
+                  id="comment-button-${post.id}"
+                  data-post-id="${post.id}">
 
-  Comment
+                  Comment
 
-</button>
+                </button>
 
               </div>
 
@@ -714,6 +715,7 @@
           `like-button-${postId}`
         );
 
+
       if (!button) {
         return;
       }
@@ -769,6 +771,32 @@
       return div.innerHTML;
 
     }
+
+
+    // ==========================================
+    // COMMENT BUTTON CLICK
+    // ==========================================
+
+    document.addEventListener(
+      'click',
+      function(event) {
+
+        const button =
+          event.target.closest(
+            '.comment-button'
+          );
+
+        if (!button) {
+          return;
+        }
+
+        const postId =
+          button.dataset.postId;
+
+        createComment(postId);
+
+      }
+    );
 
 
     // ==========================================
