@@ -3,131 +3,351 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>NLC Community</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      max-width: 700px;
-      margin: 40px auto;
-      padding: 20px;
-      background: #f5f6f7;
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f3f6f5;
+      color: #17211e;
     }
 
-    h1 {
-      margin-bottom: 5px;
+    /* =========================
+       HEADER
+    ========================= */
+
+    .topbar {
+      background: white;
+      border-bottom: 1px solid #e3e9e6;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
 
-    .subtitle {
-      color: #666;
-      margin-bottom: 30px;
+    .topbar-inner {
+      max-width: 900px;
+      margin: auto;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand img {
+      width: 52px;
+      height: 52px;
+      object-fit: contain;
+    }
+
+    .brand-text {
+      line-height: 1.1;
+    }
+
+    .brand-name {
+      font-size: 21px;
+      font-weight: 700;
+      color: #087b5b;
+    }
+
+    .brand-tagline {
+      font-size: 12px;
+      color: #71807a;
+      margin-top: 4px;
+    }
+
+    .nav-label {
+      font-size: 14px;
+      color: #65736e;
+    }
+
+
+    /* =========================
+       MAIN
+    ========================= */
+
+    .container {
+      max-width: 760px;
+      margin: 35px auto 60px;
+      padding: 0 20px;
+    }
+
+    .welcome {
+      margin-bottom: 25px;
+    }
+
+    .welcome h1 {
+      margin: 0;
+      font-size: 30px;
+      color: #17211e;
+    }
+
+    .welcome p {
+      margin: 8px 0 0;
+      color: #687671;
+      font-size: 15px;
+    }
+
+
+    /* =========================
+       COMPOSER
+    ========================= */
 
     .composer {
       background: white;
-      padding: 20px;
-      margin-bottom: 25px;
-      border-radius: 10px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      border-radius: 14px;
+      padding: 22px;
+      margin-bottom: 32px;
+      border: 1px solid #e1e8e4;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.04);
+    }
+
+    .composer-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .composer-title-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #e7f5ef;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .composer h2 {
+      margin: 0;
+      font-size: 19px;
+      color: #17211e;
     }
 
     textarea {
       width: 100%;
-      min-height: 100px;
-      box-sizing: border-box;
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-family: inherit;
-      font-size: 16px;
+      min-height: 105px;
       resize: vertical;
+
+      border: 1px solid #d8e1dd;
+      border-radius: 10px;
+
+      padding: 14px;
+
+      font-family: inherit;
+      font-size: 15px;
+      color: #17211e;
+
+      outline: none;
+      background: #fafcfb;
     }
 
-    button {
-      margin-top: 10px;
-      padding: 10px 20px;
+    textarea:focus {
+      border-color: #16875d;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(22,135,93,0.08);
+    }
+
+    .composer-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 12px;
+    }
+
+    .composer-hint {
+      font-size: 12px;
+      color: #87928e;
+    }
+
+    .post-button {
+      margin: 0;
+      padding: 10px 22px;
+
       border: none;
-      border-radius: 6px;
+      border-radius: 7px;
+
       background: #16875d;
       color: white;
-      font-size: 15px;
+
+      font-size: 14px;
+      font-weight: 600;
+
       cursor: pointer;
     }
 
-    button:hover {
-      opacity: 0.9;
+    .post-button:hover {
+      background: #11734f;
     }
 
-    button:disabled {
+    .post-button:disabled {
       opacity: 0.6;
       cursor: not-allowed;
     }
 
+    .message {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #16875d;
+    }
+
+
+    /* =========================
+       FEED HEADER
+    ========================= */
+
+    .feed-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .feed-header h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .feed-label {
+      font-size: 12px;
+      color: #7a8782;
+    }
+
+
+    /* =========================
+       POSTS
+    ========================= */
+
     .post {
       background: white;
+      border: 1px solid #e1e8e4;
+      border-radius: 14px;
       padding: 20px;
-      margin-bottom: 15px;
-      border-radius: 10px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      margin-bottom: 16px;
+
+      box-shadow: 0 3px 12px rgba(0,0,0,0.035);
+    }
+
+    .post-content {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #17211e;
+      white-space: pre-wrap;
+      word-break: break-word;
     }
 
     .post-date {
       font-size: 12px;
-      color: #888;
-      margin-top: 10px;
+      color: #89948f;
+      margin-top: 12px;
     }
+
+
+    /* =========================
+       ACTION BAR
+    ========================= */
 
     .post-actions {
       display: flex;
       align-items: center;
-      margin-top: 15px;
-      padding-top: 12px;
-      border-top: 1px solid #eee;
+
+      margin-top: 16px;
+      padding: 10px 0;
+
+      border-top: 1px solid #edf1ef;
+      border-bottom: 1px solid #edf1ef;
     }
 
     .like-button {
-      background: none;
-      color: #555;
+      background: transparent;
       border: none;
-      padding: 5px;
+
       margin: 0;
-      font-size: 15px;
+      padding: 5px 8px;
+
+      color: #596661;
+      font-size: 14px;
+      font-weight: 500;
+
       cursor: pointer;
     }
 
     .like-button:hover {
       color: #16875d;
-      opacity: 1;
     }
 
     .like-button.liked {
       color: #16875d;
-      font-weight: bold;
+      font-weight: 600;
       cursor: default;
     }
 
+    .like-button:disabled {
+      opacity: 1;
+    }
+
+
+    /* =========================
+       COMMENTS
+    ========================= */
+
     .comments {
-      margin-top: 15px;
-      padding-top: 15px;
-      border-top: 1px solid #eee;
+      margin-top: 18px;
+    }
+
+    .comments-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #26322e;
+      margin-bottom: 10px;
     }
 
     .comment {
-      padding: 8px 0;
-      border-bottom: 1px solid #f0f0f0;
+      background: #f7f9f8;
+      border-radius: 9px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
     }
 
-    .comment:last-child {
-      border-bottom: none;
+    .comment-content {
+      font-size: 14px;
+      line-height: 1.45;
+      color: #303b37;
+      word-break: break-word;
     }
 
     .comment-date {
-      font-size: 11px;
-      color: #999;
-      margin-top: 3px;
+      font-size: 10px;
+      color: #939d99;
+      margin-top: 5px;
     }
+
+    .no-comments {
+      color: #8a9591;
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+
+    /* =========================
+       COMMENT BOX
+    ========================= */
 
     .comment-box {
       display: flex;
@@ -137,67 +357,276 @@
 
     .comment-box input {
       flex: 1;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      font-size: 14px;
+
       min-width: 0;
-      box-sizing: border-box;
-    }
 
-    .comment-box button {
-      margin-top: 0;
-      padding: 10px 15px;
-      white-space: nowrap;
-    }
+      padding: 10px 12px;
 
-    .message {
-      margin-top: 10px;
+      border: 1px solid #d9e2de;
+      border-radius: 8px;
+
+      background: #fafcfb;
+
+      font-family: inherit;
       font-size: 14px;
+
+      outline: none;
     }
+
+    .comment-box input:focus {
+      border-color: #16875d;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(22,135,93,0.06);
+    }
+
+    .comment-button {
+      margin: 0;
+
+      padding: 9px 17px;
+
+      border: none;
+      border-radius: 7px;
+
+      background: #16875d;
+      color: white;
+
+      font-size: 13px;
+      font-weight: 600;
+
+      cursor: pointer;
+    }
+
+    .comment-button:hover {
+      background: #11734f;
+    }
+
+    .comment-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+
+    /* =========================
+       EMPTY / LOADING
+    ========================= */
+
+    .empty-state {
+      background: white;
+      border: 1px solid #e1e8e4;
+      border-radius: 14px;
+      padding: 35px 20px;
+      text-align: center;
+      color: #7d8985;
+    }
+
+
+    /* =========================
+       MOBILE
+    ========================= */
+
+    @media (max-width: 600px) {
+
+      .topbar-inner {
+        padding: 8px 14px;
+      }
+
+      .brand img {
+        width: 45px;
+        height: 45px;
+      }
+
+      .brand-name {
+        font-size: 18px;
+      }
+
+      .brand-tagline {
+        font-size: 11px;
+      }
+
+      .nav-label {
+        display: none;
+      }
+
+      .container {
+        margin-top: 25px;
+        padding: 0 12px;
+      }
+
+      .welcome h1 {
+        font-size: 25px;
+      }
+
+      .composer {
+        padding: 17px;
+      }
+
+      .composer-footer {
+        align-items: flex-end;
+        gap: 10px;
+      }
+
+      .composer-hint {
+        max-width: 180px;
+      }
+
+      .post {
+        padding: 16px;
+      }
+
+      .comment-box {
+        flex-direction: row;
+      }
+
+      .comment-button {
+        padding-left: 13px;
+        padding-right: 13px;
+      }
+
+    }
+
   </style>
+
 </head>
+
 
 <body>
 
-  <h1>NLC Community</h1>
 
-  <div class="subtitle">
-    A place to learn, share and connect.
-  </div>
+  <!-- =========================
+       HEADER
+  ========================= -->
+
+  <header class="topbar">
+
+    <div class="topbar-inner">
+
+      <div class="brand">
+
+        <img
+          src="NLC Logo.png"
+          alt="NLC">
+
+        <div class="brand-text">
+
+          <div class="brand-name">
+            NLC Community
+          </div>
+
+          <div class="brand-tagline">
+            Learn • Share • Connect
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="nav-label">
+        Community
+      </div>
+
+    </div>
+
+  </header>
 
 
-  <!-- CREATE POST -->
+  <!-- =========================
+       MAIN
+  ========================= -->
 
-  <div class="composer">
-
-    <h2>Share with the community</h2>
-
-    <textarea
-      id="postContent"
-      placeholder="What's on your mind?"></textarea>
-
-    <button
-      id="postButton"
-      onclick="createPost()">
-      Post
-    </button>
-
-    <div id="message" class="message"></div>
-
-  </div>
+  <main class="container">
 
 
-  <!-- COMMUNITY FEED -->
+    <div class="welcome">
 
-  <h2>Community Feed</h2>
+      <h1>
+        Welcome to the Community
+      </h1>
 
-  <div id="posts">
-    Loading posts...
-  </div>
+      <p>
+        A place to learn, share and connect with one another.
+      </p>
+
+    </div>
+
+
+    <!-- =========================
+         CREATE POST
+    ========================= -->
+
+    <div class="composer">
+
+      <div class="composer-title">
+
+        <div class="composer-title-icon">
+          💬
+        </div>
+
+        <h2>
+          Share with the community
+        </h2>
+
+      </div>
+
+
+      <textarea
+        id="postContent"
+        placeholder="What's on your mind? Share something useful, a thought, a question or an idea..."></textarea>
+
+
+      <div class="composer-footer">
+
+        <div class="composer-hint">
+          Keep it beneficial and respectful.
+        </div>
+
+        <button
+          class="post-button"
+          id="postButton"
+          type="button"
+          onclick="createPost()">
+
+          Post
+
+        </button>
+
+      </div>
+
+
+      <div
+        id="message"
+        class="message">
+      </div>
+
+    </div>
+
+
+    <!-- =========================
+         COMMUNITY FEED
+    ========================= -->
+
+    <div class="feed-header">
+
+      <h2>
+        Community Feed
+      </h2>
+
+      <div class="feed-label">
+        Latest posts
+      </div>
+
+    </div>
+
+
+    <div id="posts">
+      Loading posts...
+    </div>
+
+
+  </main>
 
 
   <script>
+
 
     // ==========================================
     // SUPABASE CONNECTION
@@ -233,6 +662,7 @@
             ascending: false
           });
 
+
       if (error) {
 
         console.error(
@@ -241,28 +671,31 @@
         );
 
         postsContainer.innerHTML =
-          '<p>Unable to load posts.</p>';
+          '<div class="empty-state">Unable to load posts.</div>';
 
         return;
       }
+
 
       if (!data || data.length === 0) {
 
         postsContainer.innerHTML =
-          '<p>No posts yet. Be the first to share something!</p>';
+          '<div class="empty-state">No posts yet. Be the first to share something!</div>';
 
         return;
       }
 
+
       let html = '';
+
 
       for (const post of data) {
 
         html += `
 
-          <div class="post">
+          <article class="post">
 
-            <div>
+            <div class="post-content">
               ${escapeHtml(post.content)}
             </div>
 
@@ -273,13 +706,12 @@
             </div>
 
 
-            <!-- LIKE -->
-
             <div class="post-actions">
 
               <button
                 class="like-button"
                 id="like-button-${post.id}"
+                type="button"
                 onclick="likePost('${post.id}')">
 
                 ❤️ Like
@@ -292,11 +724,11 @@
             </div>
 
 
-            <!-- COMMENTS -->
-
             <div class="comments">
 
-              <strong>Comments</strong>
+              <div class="comments-title">
+                Comments
+              </div>
 
               <div id="comments-${post.id}">
                 Loading comments...
@@ -312,6 +744,7 @@
                   onkeydown="handleCommentKey(event, '${post.id}')"
                 >
 
+
                 <button
                   type="button"
                   class="comment-button"
@@ -326,10 +759,12 @@
 
             </div>
 
-          </div>
+          </article>
 
         `;
+
       }
+
 
       postsContainer.innerHTML = html;
 
@@ -364,8 +799,10 @@
       const message =
         document.getElementById('message');
 
+
       const content =
         textarea.value.trim();
+
 
       if (!content) {
 
@@ -374,6 +811,7 @@
 
         return;
       }
+
 
       button.disabled = true;
 
@@ -432,6 +870,7 @@
           `comments-${postId}`
         );
 
+
       if (!container) {
         return;
       }
@@ -455,7 +894,7 @@
         );
 
         container.innerHTML =
-          '<p>Unable to load comments.</p>';
+          '<div class="no-comments">Unable to load comments.</div>';
 
         return;
       }
@@ -464,7 +903,7 @@
       if (!data || data.length === 0) {
 
         container.innerHTML =
-          '<p style="color:#888;">No comments yet.</p>';
+          '<div class="no-comments">No comments yet.</div>';
 
         return;
       }
@@ -475,7 +914,7 @@
 
           <div class="comment">
 
-            <div>
+            <div class="comment-content">
               ${escapeHtml(comment.content)}
             </div>
 
@@ -505,10 +944,16 @@
           `comment-${postId}`
         );
 
+
       const button =
         document.getElementById(
           `comment-button-${postId}`
         );
+
+
+      if (!input || !button) {
+        return;
+      }
 
 
       const content =
@@ -526,7 +971,7 @@
         'Adding...';
 
 
-      const { data, error } =
+      const { error } =
         await supabaseClient
           .from('comments')
           .insert([
@@ -534,8 +979,7 @@
               post_id: postId,
               content: content
             }
-          ])
-          .select();
+          ]);
 
 
       if (error) {
@@ -582,6 +1026,7 @@
         document.getElementById(
           `like-count-${postId}`
         );
+
 
       if (!countElement) {
         return;
@@ -630,10 +1075,13 @@
         );
 
 
-      // IMPORTANT:
-      // Check BEFORE inserting.
-      // This prevents repeated likes
-      // from the same browser.
+      if (!button) {
+        return;
+      }
+
+
+      // Prevent repeated likes
+      // from the same browser
 
       const alreadyLiked =
         localStorage.getItem(
@@ -679,17 +1127,14 @@
       }
 
 
-      // Remember this browser has liked it
-
       localStorage.setItem(
         `liked-${postId}`,
         'true'
       );
 
 
-      // Change button appearance
-
       button.classList.add('liked');
+
 
       button.innerHTML =
         '❤️ Liked ' +
@@ -731,6 +1176,7 @@
 
         button.classList.add('liked');
 
+
         button.innerHTML =
           '❤️ Liked ' +
           `<span id="like-count-${postId}"></span>`;
@@ -758,6 +1204,35 @@
 
 
     // ==========================================
+    // COMMENT BUTTON CLICK
+    // ==========================================
+
+    document.addEventListener(
+      'click',
+      function(event) {
+
+        const button =
+          event.target.closest(
+            '.comment-button'
+          );
+
+
+        if (!button) {
+          return;
+        }
+
+
+        const postId =
+          button.dataset.postId;
+
+
+        createComment(postId);
+
+      }
+    );
+
+
+    // ==========================================
     // BASIC HTML SECURITY
     // ==========================================
 
@@ -771,32 +1246,6 @@
       return div.innerHTML;
 
     }
-
-
-    // ==========================================
-    // COMMENT BUTTON CLICK
-    // ==========================================
-
-    document.addEventListener(
-      'click',
-      function(event) {
-
-        const button =
-          event.target.closest(
-            '.comment-button'
-          );
-
-        if (!button) {
-          return;
-        }
-
-        const postId =
-          button.dataset.postId;
-
-        createComment(postId);
-
-      }
-    );
 
 
     // ==========================================
