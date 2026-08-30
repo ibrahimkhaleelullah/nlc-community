@@ -140,6 +140,46 @@
       color: #17211e;
     }
 
+    /* NAME FIELD */
+
+    .name-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #53615c;
+      margin-bottom: 6px;
+    }
+
+    .name-input {
+      width: 100%;
+      padding: 11px 12px;
+      margin-bottom: 12px;
+
+      border: 1px solid #d8e1dd;
+      border-radius: 9px;
+
+      background: #fafcfb;
+
+      font-family: inherit;
+      font-size: 14px;
+      color: #17211e;
+
+      outline: none;
+    }
+
+    .name-input:focus {
+      border-color: #16875d;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(22,135,93,0.06);
+    }
+
+    .name-note {
+      font-size: 11px;
+      color: #89948f;
+      margin-top: -7px;
+      margin-bottom: 13px;
+    }
+
     textarea {
       width: 100%;
       min-height: 105px;
@@ -244,6 +284,46 @@
       box-shadow: 0 3px 12px rgba(0,0,0,0.035);
     }
 
+    .post-author {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 13px;
+    }
+
+    .author-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #e7f5ef;
+      color: #16875d;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      font-size: 14px;
+      font-weight: 700;
+
+      flex-shrink: 0;
+    }
+
+    .author-info {
+      min-width: 0;
+    }
+
+    .author-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #26322e;
+    }
+
+    .author-role {
+      font-size: 11px;
+      color: #8a9591;
+      margin-top: 2px;
+    }
+
     .post-content {
       font-size: 16px;
       line-height: 1.6;
@@ -323,6 +403,34 @@
       border-radius: 9px;
       padding: 10px 12px;
       margin-bottom: 8px;
+    }
+
+    .comment-author {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 5px;
+    }
+
+    .comment-avatar {
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      background: #e7f5ef;
+      color: #16875d;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .comment-author-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: #53615c;
     }
 
     .comment-content {
@@ -568,6 +676,28 @@
       </div>
 
 
+      <label
+        class="name-label"
+        for="authorName">
+
+        Your name
+
+      </label>
+
+
+      <input
+        class="name-input"
+        id="authorName"
+        type="text"
+        maxlength="80"
+        placeholder="Enter your name">
+
+
+      <div class="name-note">
+        Your name will appear with your posts and comments.
+      </div>
+
+
       <textarea
         id="postContent"
         placeholder="What's on your mind? Share something useful, a thought, a question or an idea..."></textarea>
@@ -646,6 +776,78 @@
 
 
     // ==========================================
+    // NAME MEMORY
+    // ==========================================
+
+    const savedName =
+      localStorage.getItem('nlc-author-name');
+
+    if (savedName) {
+
+      document.getElementById(
+        'authorName'
+      ).value = savedName;
+
+    }
+
+
+    // ==========================================
+    // GET AUTHOR NAME
+    // ==========================================
+
+    function getAuthorName() {
+
+      const nameInput =
+        document.getElementById('authorName');
+
+      const name =
+        nameInput.value.trim();
+
+      return name;
+
+    }
+
+
+    // ==========================================
+    // SAVE AUTHOR NAME
+    // ==========================================
+
+    function saveAuthorName(name) {
+
+      localStorage.setItem(
+        'nlc-author-name',
+        name
+      );
+
+    }
+
+
+    // ==========================================
+    // GET INITIALS
+    // ==========================================
+
+    function getInitials(name) {
+
+      if (!name) {
+        return '?';
+      }
+
+      const parts =
+        name.trim().split(/\s+/);
+
+      if (parts.length === 1) {
+        return parts[0].substring(0, 1).toUpperCase();
+      }
+
+      return (
+        parts[0].substring(0, 1) +
+        parts[parts.length - 1].substring(0, 1)
+      ).toUpperCase();
+
+    }
+
+
+    // ==========================================
     // LOAD POSTS
     // ==========================================
 
@@ -691,13 +893,43 @@
 
       for (const post of data) {
 
+        const authorName =
+          post.author_name || 'Community Member';
+
+        const initials =
+          getInitials(authorName);
+
+
         html += `
 
           <article class="post">
 
+
+            <div class="post-author">
+
+              <div class="author-avatar">
+                ${escapeHtml(initials)}
+              </div>
+
+              <div class="author-info">
+
+                <div class="author-name">
+                  ${escapeHtml(authorName)}
+                </div>
+
+                <div class="author-role">
+                  Community member
+                </div>
+
+              </div>
+
+            </div>
+
+
             <div class="post-content">
               ${escapeHtml(post.content)}
             </div>
+
 
             <div class="post-date">
               ${new Date(
@@ -726,9 +958,14 @@
 
             <div class="comments">
 
-            <div class="comments-title" id="comments-title-${post.id}">
-            Comments
-            </div>
+              <div
+                class="comments-title"
+                id="comments-title-${post.id}">
+
+                Comments
+
+              </div>
+
 
               <div id="comments-${post.id}">
                 Loading comments...
@@ -740,6 +977,7 @@
                 <input
                   id="comment-${post.id}"
                   type="text"
+                  maxlength="500"
                   placeholder="Write a comment..."
                   onkeydown="handleCommentKey(event, '${post.id}')"
                 >
@@ -804,13 +1042,35 @@
         textarea.value.trim();
 
 
+      const authorName =
+        getAuthorName();
+
+
+      if (!authorName) {
+
+        message.textContent =
+          'Please enter your name first.';
+
+        document.getElementById(
+          'authorName'
+        ).focus();
+
+        return;
+      }
+
+
       if (!content) {
 
         message.textContent =
           'Please write something first.';
 
+        textarea.focus();
+
         return;
       }
+
+
+      saveAuthorName(authorName);
 
 
       button.disabled = true;
@@ -824,7 +1084,8 @@
           .from('posts')
           .insert([
             {
-              content: content
+              content: content,
+              author_name: authorName
             }
           ]);
 
@@ -899,16 +1160,24 @@
         return;
       }
 
-      const commentCount = data ? data.length : 0;
 
-const title = document.getElementById(
-    `comments-title-${postId}`
-);
+      const commentCount =
+        data ? data.length : 0;
 
-if (title) {
-    title.textContent =
-        `💬 ${commentCount} Comment${commentCount === 1 ? '' : 's'}`;
-}
+
+      const title =
+        document.getElementById(
+          `comments-title-${postId}`
+        );
+
+
+      if (title) {
+
+        title.textContent =
+          `💬 ${commentCount} Comment${commentCount === 1 ? '' : 's'}`;
+
+      }
+
 
       if (!data || data.length === 0) {
 
@@ -920,25 +1189,51 @@ if (title) {
 
 
       container.innerHTML =
-        data.map(comment => `
+        data.map(comment => {
 
-          <div class="comment">
+          const commentAuthor =
+            comment.author_name ||
+            'Community Member';
 
-            <div class="comment-content">
-              ${escapeHtml(comment.content)}
+          const initials =
+            getInitials(commentAuthor);
+
+
+          return `
+
+            <div class="comment">
+
+              <div class="comment-author">
+
+                <div class="comment-avatar">
+                  ${escapeHtml(initials)}
+                </div>
+
+                <div class="comment-author-name">
+                  ${escapeHtml(commentAuthor)}
+                </div>
+
+              </div>
+
+
+              <div class="comment-content">
+                ${escapeHtml(comment.content)}
+              </div>
+
+
+              <div class="comment-date">
+
+                ${new Date(
+                  comment.created_at
+                ).toLocaleString()}
+
+              </div>
+
             </div>
 
-            <div class="comment-date">
+          `;
 
-              ${new Date(
-                comment.created_at
-              ).toLocaleString()}
-
-            </div>
-
-          </div>
-
-        `).join('');
+        }).join('');
 
     }
 
@@ -970,9 +1265,30 @@ if (title) {
         input.value.trim();
 
 
+      const authorName =
+        getAuthorName();
+
+
+      if (!authorName) {
+
+        alert(
+          'Please enter your name at the top before commenting.'
+        );
+
+        document.getElementById(
+          'authorName'
+        ).focus();
+
+        return;
+      }
+
+
       if (!content) {
         return;
       }
+
+
+      saveAuthorName(authorName);
 
 
       button.disabled = true;
@@ -987,7 +1303,8 @@ if (title) {
           .insert([
             {
               post_id: postId,
-              content: content
+              content: content,
+              author_name: authorName
             }
           ]);
 
@@ -1089,9 +1406,6 @@ if (title) {
         return;
       }
 
-
-      // Prevent repeated likes
-      // from the same browser
 
       const alreadyLiked =
         localStorage.getItem(
