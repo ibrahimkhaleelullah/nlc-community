@@ -25,6 +25,41 @@
       margin-bottom: 30px;
     }
 
+    .composer {
+      background: white;
+      padding: 20px;
+      margin-bottom: 25px;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 100px;
+      box-sizing: border-box;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 16px;
+      resize: vertical;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      background: #16875d;
+      color: white;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
     .post {
       background: white;
       padding: 20px;
@@ -38,6 +73,11 @@
       color: #888;
       margin-top: 10px;
     }
+
+    .message {
+      margin-top: 10px;
+      font-size: 14px;
+    }
   </style>
 </head>
 
@@ -45,6 +85,17 @@
 
   <h1>NLC Community</h1>
   <div class="subtitle">A place to learn, share and connect.</div>
+
+  <div class="composer">
+    <h2>Share with the community</h2>
+
+    <textarea id="postContent"
+      placeholder="What's on your mind?"></textarea>
+
+    <button onclick="createPost()">Post</button>
+
+    <div id="message" class="message"></div>
+  </div>
 
   <h2>Community Feed</h2>
 
@@ -55,7 +106,7 @@
   <script>
     const SUPABASE_URL = 'https://zbogfymmlnifzoasemlt.supabase.co';
 
-    const SUPABASE_KEY = 'sb_publishable_77b2DtF2XQLyfKEg7ZBNYA_odCDFWVJ';
+    const SUPABASE_KEY = 'PASTE_YOUR_PUBLISHABLE_KEY_HERE';
 
     const supabaseClient = window.supabase.createClient(
       SUPABASE_URL,
@@ -91,6 +142,37 @@
           </div>
         </div>
       `).join('');
+    }
+
+    async function createPost() {
+      const textarea = document.getElementById('postContent');
+      const message = document.getElementById('message');
+
+      const content = textarea.value.trim();
+
+      if (!content) {
+        message.textContent = 'Please write something first.';
+        return;
+      }
+
+      message.textContent = 'Posting...';
+
+      const { error } = await supabaseClient
+        .from('posts')
+        .insert([
+          { content: content }
+        ]);
+
+      if (error) {
+        console.error(error);
+        message.textContent = 'Unable to create post.';
+        return;
+      }
+
+      textarea.value = '';
+      message.textContent = 'Posted!';
+
+      loadPosts();
     }
 
     function escapeHtml(text) {
