@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <meta name="description" content="NLC Community — learn, share and connect.">
+  <meta name="description" content="NLC Community — a private space to learn, share and connect.">
   <title>NLC Community</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="style.css">
@@ -34,49 +34,68 @@
   </header>
 
   <main class="container">
-    <section class="auth-card" id="authCard">
-      <h2>Join the NLC Community</h2>
-      <div class="muted">Sign in to participate in conversations and connect with members.</div>
-
-      <div class="auth-tabs">
-        <button id="loginTab" class="auth-tab active" type="button" onclick="showLogin()">Sign In</button>
-        <button id="signupTab" class="auth-tab" type="button" onclick="showSignup()">Create Account</button>
+    <section class="guest-shell" id="guestShell">
+      <div class="guest-hero">
+        <div class="guest-kicker">Private member community</div>
+        <h1>A thoughtful space to learn, share and connect.</h1>
+        <p>NLC Community brings members together for useful conversations, shared learning and meaningful connection in a respectful environment.</p>
+        <div class="privacy-note"><span>🔒</span><div><strong>Members-only community</strong><br><span>Posts, comments and member profiles are visible only after signing in.</span></div></div>
       </div>
 
-      <div id="loginForm">
-        <input id="loginEmail" class="input" type="email" placeholder="Email address" autocomplete="email">
-        <input id="loginPassword" class="input" type="password" placeholder="Password" autocomplete="current-password">
-        <button id="loginButton" class="primary auth-button" type="button" onclick="signIn()">Sign In</button>
-      </div>
+      <section class="auth-card" id="authCard">
+        <h2>Welcome</h2>
+        <div class="muted">Sign in to enter the community, or create your member account.</div>
 
-      <div id="signupForm" style="display:none;">
-        <input id="signupName" class="input" type="text" maxlength="80" placeholder="Your full name" autocomplete="name">
-        <input id="signupEmail" class="input" type="email" placeholder="Email address" autocomplete="email">
-        <input id="signupPassword" class="input" type="password" placeholder="Create a password" autocomplete="new-password">
-        <button id="signupButton" class="primary auth-button" type="button" onclick="signUp()">Create Account</button>
-      </div>
+        <div class="auth-tabs">
+          <button id="loginTab" class="auth-tab active" type="button" onclick="showLogin()">Sign In</button>
+          <button id="signupTab" class="auth-tab" type="button" onclick="showSignup()">Create Account</button>
+        </div>
 
-      <div id="authMessage" class="message"></div>
+        <div id="loginForm">
+          <input id="loginEmail" class="input" type="email" placeholder="Email address" autocomplete="email">
+          <input id="loginPassword" class="input" type="password" placeholder="Password" autocomplete="current-password">
+          <button id="loginButton" class="primary auth-button" type="button" onclick="signIn()">Sign In</button>
+        </div>
+
+        <div id="signupForm" style="display:none;">
+          <input id="signupName" class="input" type="text" maxlength="80" placeholder="Your full name" autocomplete="name">
+          <input id="signupEmail" class="input" type="email" placeholder="Email address" autocomplete="email">
+          <input id="signupPassword" class="input" type="password" placeholder="Create a password" autocomplete="new-password">
+          <button id="signupButton" class="primary auth-button" type="button" onclick="signUp()">Create Account</button>
+        </div>
+
+        <div id="authMessage" class="message"></div>
+      </section>
     </section>
 
-    <section class="composer" id="composer" style="display:none;">
-      <div class="composer-head">
-        <div class="avatar" id="composerAvatar">?</div>
-        <h2>Start a conversation</h2>
-      </div>
-      <textarea id="postContent" maxlength="3000" placeholder="Share an idea, question, insight or something useful with the community..."></textarea>
-      <div class="composer-footer">
-        <div class="composer-hint">Keep it useful, respectful and relevant.</div>
-        <button id="postButton" class="primary" type="button" onclick="createPost()">Post</button>
-      </div>
-      <div id="composerMessage" class="message"></div>
-    </section>
+    <section id="memberShell" style="display:none;">
+      <section class="member-welcome">
+        <div>
+          <div class="member-welcome-kicker">NLC Community</div>
+          <h1 id="memberWelcomeTitle">Welcome back</h1>
+          <p>Join the conversation, share something useful, or learn from what others are discussing.</p>
+        </div>
+      </section>
 
-    <div class="feed-header">
-      <h2>Community Feed</h2>
-      <div class="feed-label">Latest conversations</div>
-    </div>
-    <div id="posts">Loading posts...</div>
+      <section class="composer" id="composer">
+        <div class="composer-head">
+          <div class="avatar" id="composerAvatar">?</div>
+          <h2>Start a conversation</h2>
+        </div>
+        <textarea id="postContent" maxlength="3000" placeholder="Share an idea, question, insight or something useful with the community..."></textarea>
+        <div class="composer-footer">
+          <div class="composer-hint">Keep it useful, respectful and relevant.</div>
+          <button id="postButton" class="primary" type="button" onclick="createPost()">Post</button>
+        </div>
+        <div id="composerMessage" class="message"></div>
+      </section>
+
+      <div class="feed-header">
+        <h2>Community Feed</h2>
+        <div class="feed-label">Latest conversations</div>
+      </div>
+      <div id="posts"></div>
+    </section>
   </main>
 
   <div class="modal-backdrop" id="editProfileModal" onclick="if(event.target===this)closeMyProfile()">
@@ -115,7 +134,6 @@
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
   <script src="app.js"></script>
 </body>
 </html>
