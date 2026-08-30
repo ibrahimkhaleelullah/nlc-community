@@ -246,6 +246,120 @@
 
 
     /* =========================
+       MY PROFILE
+    ========================= */
+
+    .profile-section {
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid #e8eeeb;
+    }
+
+    .profile-toggle {
+      border: 1px solid #d8e1dd;
+      background: white;
+      color: #16875d;
+      padding: 8px 13px;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .profile-toggle:hover {
+      background: #f5f9f7;
+    }
+
+    .profile-form {
+      margin-top: 15px;
+      padding: 16px;
+      background: #f7f9f8;
+      border-radius: 10px;
+    }
+
+    .profile-label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #53615c;
+    }
+
+    .profile-input,
+    .profile-textarea {
+      width: 100%;
+      padding: 10px 11px;
+      margin-bottom: 12px;
+      border: 1px solid #d8e1dd;
+      border-radius: 8px;
+      background: white;
+      font-family: inherit;
+      font-size: 14px;
+      color: #17211e;
+      outline: none;
+    }
+
+    .profile-input:focus,
+    .profile-textarea:focus {
+      border-color: #16875d;
+      box-shadow: 0 0 0 3px rgba(22,135,93,0.06);
+    }
+
+    .profile-input[readonly] {
+      background: #eef2f0;
+      color: #687671;
+    }
+
+    .profile-textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .profile-note {
+      margin-top: -5px;
+      margin-bottom: 12px;
+      font-size: 11px;
+      color: #89948f;
+    }
+
+    .profile-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .profile-save-button {
+      border: none;
+      background: #16875d;
+      color: white;
+      padding: 9px 16px;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .profile-save-button:hover {
+      background: #11734f;
+    }
+
+    .profile-save-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .profile-message {
+      font-size: 12px;
+      color: #16875d;
+    }
+
+    .profile-message.error {
+      color: #b44747;
+    }
+
+
+    /* =========================
        COMPOSER
     ========================= */
 
@@ -757,6 +871,10 @@
         padding-right: 13px;
       }
 
+      .profile-actions {
+        align-items: flex-end;
+      }
+
     }
 
   </style>
@@ -970,6 +1088,92 @@
             Sign Out
 
           </button>
+
+        </div>
+
+
+        <div class="profile-section">
+
+          <button
+            type="button"
+            class="profile-toggle"
+            id="profileToggleButton"
+            onclick="toggleProfileEditor()">
+
+            My Profile
+
+          </button>
+
+
+          <div
+            id="profileEditor"
+            class="profile-form"
+            style="display:none;">
+
+            <label
+              class="profile-label"
+              for="profileEmail">
+              Email
+            </label>
+
+            <input
+              id="profileEmail"
+              class="profile-input"
+              type="email"
+              readonly>
+
+            <div class="profile-note">
+              Your email is linked to your account and cannot be changed here.
+            </div>
+
+
+            <label
+              class="profile-label"
+              for="profileName">
+              Full Name
+            </label>
+
+            <input
+              id="profileName"
+              class="profile-input"
+              type="text"
+              maxlength="80"
+              placeholder="Your full name">
+
+
+            <label
+              class="profile-label"
+              for="profileBio">
+              Bio <span style="font-weight:400;">(optional)</span>
+            </label>
+
+            <textarea
+              id="profileBio"
+              class="profile-textarea"
+              maxlength="300"
+              placeholder="Tell the community a little about yourself..."></textarea>
+
+
+            <div class="profile-actions">
+
+              <div
+                id="profileMessage"
+                class="profile-message">
+              </div>
+
+              <button
+                type="button"
+                id="profileSaveButton"
+                class="profile-save-button"
+                onclick="saveProfile()">
+
+                Save Profile
+
+              </button>
+
+            </div>
+
+          </div>
 
         </div>
 
@@ -1351,11 +1555,6 @@
         'Create Account';
 
 
-      /*
-       * Because email confirmation is enabled,
-       * Supabase normally returns a user but no active session.
-       */
-
       if (data.user && !data.session) {
 
         setAuthMessage(
@@ -1532,11 +1731,15 @@
           .maybeSingle();
 
       if (error) {
-        console.error('Profile loading error:', error);
+        console.error(
+          'Profile loading error:',
+          error
+        );
         return;
       }
 
       currentProfile = data || null;
+
     }
 
 
@@ -1550,7 +1753,10 @@
         return 'Community Member';
       }
 
-      if (currentProfile && currentProfile.full_name) {
+      if (
+        currentProfile &&
+        currentProfile.full_name
+      ) {
         return currentProfile.full_name.trim();
       }
 
@@ -1563,6 +1769,104 @@
         user.email?.split('@')[0] ||
         'Community Member'
       );
+
+    }
+
+
+    // ==========================================
+    // PROFILE EDITOR
+    // ==========================================
+
+    function toggleProfileEditor() {
+      const editor = document.getElementById('profileEditor');
+      const button = document.getElementById('profileToggleButton');
+      if (!editor || !button) return;
+
+      const isOpen = editor.style.display !== 'none';
+      editor.style.display = isOpen ? 'none' : 'block';
+      button.textContent = isOpen ? 'My Profile' : 'Hide Profile';
+
+      if (!isOpen) populateProfileEditor();
+    }
+
+
+    function setProfileMessage(message, isError = false) {
+      const element = document.getElementById('profileMessage');
+      if (!element) return;
+      element.textContent = message;
+      element.classList.toggle('error', isError);
+    }
+
+
+    function populateProfileEditor() {
+      if (!currentUser) return;
+
+      const emailInput = document.getElementById('profileEmail');
+      const nameInput = document.getElementById('profileName');
+      const bioInput = document.getElementById('profileBio');
+
+      if (emailInput) emailInput.value = currentUser.email || '';
+      if (nameInput) nameInput.value = currentProfile?.full_name || getUserName(currentUser);
+      if (bioInput) bioInput.value = currentProfile?.bio || '';
+
+      setProfileMessage('');
+    }
+
+
+    async function saveProfile() {
+
+      if (!currentUser) {
+        setProfileMessage('Please sign in first.', true);
+        return;
+      }
+
+      const nameInput = document.getElementById('profileName');
+      const bioInput = document.getElementById('profileBio');
+      const button = document.getElementById('profileSaveButton');
+
+      const name = nameInput.value.trim();
+      const bio = bioInput.value.trim();
+
+      if (!name) {
+        setProfileMessage('Please enter your full name.', true);
+        nameInput.focus();
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = 'Saving...';
+      setProfileMessage('');
+
+      const { data, error } = await supabaseClient
+        .from('profiles')
+        .update({
+          full_name: name,
+          bio: bio || null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', currentUser.id)
+        .select('id, full_name, bio, avatar_url')
+        .single();
+
+      if (error) {
+        console.error('Profile update error:', error);
+        setProfileMessage('Unable to save your profile: ' + error.message, true);
+        button.disabled = false;
+        button.textContent = 'Save Profile';
+        return;
+      }
+
+      currentProfile = data;
+
+      document.getElementById('currentUserName').textContent =
+        getUserName(currentUser);
+
+      document.getElementById('authorName').value =
+        getUserName(currentUser);
+
+      setProfileMessage('Profile saved successfully.');
+      button.disabled = false;
+      button.textContent = 'Save Profile';
     }
 
 
@@ -1631,6 +1935,15 @@
         ).textContent =
           name;
 
+        const profileEmail = document.getElementById('profileEmail');
+        if (profileEmail) profileEmail.value = user.email || '';
+
+        const profileName = document.getElementById('profileName');
+        if (profileName) profileName.value = currentProfile?.full_name || name;
+
+        const profileBio = document.getElementById('profileBio');
+        if (profileBio) profileBio.value = currentProfile?.bio || '';
+
 
         composer.style.display =
           'block';
@@ -1639,11 +1952,6 @@
         nameInput.value =
           name;
 
-
-        /*
-         * Make sure the name is not edited
-         * independently from the account.
-         */
 
         nameInput.readOnly =
           true;
@@ -1702,6 +2010,11 @@
         composer.style.display =
           'none';
 
+        const profileEditor = document.getElementById('profileEditor');
+        const profileToggleButton = document.getElementById('profileToggleButton');
+        if (profileEditor) profileEditor.style.display = 'none';
+        if (profileToggleButton) profileToggleButton.textContent = 'My Profile';
+
 
         commentInputs.forEach(
           input => {
@@ -1746,7 +2059,9 @@
       currentUser =
         user;
 
-      await loadCurrentProfile(user);
+      await loadCurrentProfile(
+        user
+      );
 
       updateAuthUI(
         user
@@ -1789,7 +2104,9 @@
           ? data.session.user
           : null;
 
-      await loadCurrentProfile(currentUser);
+      await loadCurrentProfile(
+        currentUser
+      );
 
       updateAuthUI(
         currentUser
@@ -1817,7 +2134,10 @@
             ? session.user
             : null;
 
-        await loadCurrentProfile(currentUser);
+        await loadCurrentProfile(
+          currentUser
+        );
+
 
         updateAuthUI(
           currentUser
@@ -2536,12 +2856,6 @@
           error
         );
 
-
-        /*
-         * If the database unique constraint
-         * catches a duplicate like, simply
-         * show the post as already liked.
-         */
 
         if (
           error.code === '23505'
