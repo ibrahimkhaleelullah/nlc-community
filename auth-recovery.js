@@ -1,4 +1,4 @@
-const COMMUNITY_URL='https://snazzy-puppy-be2958.netlify.app/';
+const COMMUNITY_URL='https://nlc-community.netlify.app/';
 
 function openForgotPassword(){
   const loginEmail=document.getElementById('loginEmail')?.value?.trim()||'';
