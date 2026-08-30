@@ -104,6 +104,148 @@
 
 
     /* =========================
+       AUTHENTICATION
+    ========================= */
+
+    .auth-card {
+      background: white;
+      border: 1px solid #e1e8e4;
+      border-radius: 14px;
+      padding: 22px;
+      margin-bottom: 25px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.035);
+    }
+
+    .auth-card h2 {
+      margin: 0 0 6px;
+      font-size: 20px;
+    }
+
+    .auth-card p {
+      margin: 0 0 16px;
+      color: #71807a;
+      font-size: 13px;
+    }
+
+    .auth-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #e8eeeb;
+      padding-bottom: 8px;
+    }
+
+    .auth-tab {
+      border: none;
+      background: transparent;
+      color: #71807a;
+      padding: 8px 12px;
+      margin: 0;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 7px;
+    }
+
+    .auth-tab.active {
+      background: #e7f5ef;
+      color: #16875d;
+    }
+
+    .auth-input {
+      width: 100%;
+      padding: 11px 12px;
+      margin-bottom: 10px;
+
+      border: 1px solid #d8e1dd;
+      border-radius: 8px;
+
+      font-family: inherit;
+      font-size: 14px;
+
+      outline: none;
+      background: #fafcfb;
+    }
+
+    .auth-input:focus {
+      border-color: #16875d;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(22,135,93,0.06);
+    }
+
+    .auth-button {
+      width: 100%;
+      padding: 11px;
+
+      border: none;
+      border-radius: 8px;
+
+      background: #16875d;
+      color: white;
+
+      font-size: 14px;
+      font-weight: 600;
+
+      cursor: pointer;
+    }
+
+    .auth-button:hover {
+      background: #11734f;
+    }
+
+    .auth-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .auth-message {
+      margin-top: 12px;
+      font-size: 13px;
+      color: #16875d;
+      line-height: 1.5;
+    }
+
+    .auth-message.error {
+      color: #b44747;
+    }
+
+    .logged-in-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+    }
+
+    .logged-in-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .logged-in-subtitle {
+      margin-top: 4px;
+      font-size: 12px;
+      color: #7d8985;
+    }
+
+    .signout-button {
+      border: 1px solid #d8e1dd;
+      background: white;
+      color: #53615c;
+
+      padding: 8px 14px;
+      border-radius: 7px;
+
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .signout-button:hover {
+      background: #f5f8f6;
+    }
+
+
+    /* =========================
        COMPOSER
     ========================= */
 
@@ -140,8 +282,6 @@
       color: #17211e;
     }
 
-    /* NAME FIELD */
-
     .name-label {
       display: block;
       font-size: 13px;
@@ -173,6 +313,11 @@
       box-shadow: 0 0 0 3px rgba(22,135,93,0.06);
     }
 
+    .name-input:read-only {
+      background: #f3f6f5;
+      color: #596661;
+    }
+
     .name-note {
       font-size: 11px;
       color: #89948f;
@@ -202,6 +347,11 @@
       border-color: #16875d;
       background: white;
       box-shadow: 0 0 0 3px rgba(22,135,93,0.08);
+    }
+
+    textarea:disabled {
+      background: #f3f6f5;
+      cursor: not-allowed;
     }
 
     .composer-footer {
@@ -245,6 +395,10 @@
       margin-top: 10px;
       font-size: 13px;
       color: #16875d;
+    }
+
+    .message.error {
+      color: #b44747;
     }
 
 
@@ -487,6 +641,11 @@
       box-shadow: 0 0 0 3px rgba(22,135,93,0.06);
     }
 
+    .comment-box input:disabled {
+      background: #f3f6f5;
+      cursor: not-allowed;
+    }
+
     .comment-button {
       margin: 0;
 
@@ -562,6 +721,14 @@
 
       .welcome h1 {
         font-size: 25px;
+      }
+
+      .auth-card {
+        padding: 17px;
+      }
+
+      .logged-in-row {
+        align-items: flex-start;
       }
 
       .composer {
@@ -644,6 +811,173 @@
   <main class="container">
 
 
+    <!-- =========================
+         AUTHENTICATION
+    ========================= -->
+
+    <div class="auth-card" id="authCard">
+
+      <!-- LOGGED OUT -->
+
+      <div id="authLoggedOut">
+
+        <h2>
+          Join the NLC Community
+        </h2>
+
+        <p>
+          Create an account to participate in the community.
+        </p>
+
+
+        <div class="auth-tabs">
+
+          <button
+            type="button"
+            id="loginTab"
+            class="auth-tab active"
+            onclick="showLogin()">
+
+            Sign In
+
+          </button>
+
+
+          <button
+            type="button"
+            id="signupTab"
+            class="auth-tab"
+            onclick="showSignup()">
+
+            Create Account
+
+          </button>
+
+        </div>
+
+
+        <!-- LOGIN -->
+
+        <div id="loginForm">
+
+          <input
+            id="loginEmail"
+            class="auth-input"
+            type="email"
+            placeholder="Email address"
+            autocomplete="email">
+
+
+          <input
+            id="loginPassword"
+            class="auth-input"
+            type="password"
+            placeholder="Password"
+            autocomplete="current-password">
+
+
+          <button
+            type="button"
+            id="loginButton"
+            class="auth-button"
+            onclick="signIn()">
+
+            Sign In
+
+          </button>
+
+        </div>
+
+
+        <!-- SIGN UP -->
+
+        <div
+          id="signupForm"
+          style="display:none;">
+
+          <input
+            id="signupName"
+            class="auth-input"
+            type="text"
+            maxlength="80"
+            placeholder="Your full name"
+            autocomplete="name">
+
+
+          <input
+            id="signupEmail"
+            class="auth-input"
+            type="email"
+            placeholder="Email address"
+            autocomplete="email">
+
+
+          <input
+            id="signupPassword"
+            class="auth-input"
+            type="password"
+            placeholder="Create a password"
+            autocomplete="new-password">
+
+
+          <button
+            type="button"
+            id="signupButton"
+            class="auth-button"
+            onclick="signUp()">
+
+            Create Account
+
+          </button>
+
+        </div>
+
+
+        <div
+          id="authMessage"
+          class="auth-message">
+        </div>
+
+      </div>
+
+
+      <!-- LOGGED IN -->
+
+      <div
+        id="authLoggedIn"
+        style="display:none;">
+
+        <div class="logged-in-row">
+
+          <div>
+
+            <div class="logged-in-title">
+              Welcome, <span id="currentUserName"></span> 👋
+            </div>
+
+            <div class="logged-in-subtitle">
+              You're signed in to the NLC Community.
+            </div>
+
+          </div>
+
+
+          <button
+            type="button"
+            class="signout-button"
+            onclick="signOut()">
+
+            Sign Out
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
     <div class="welcome">
 
       <h1>
@@ -661,7 +995,9 @@
          CREATE POST
     ========================= -->
 
-    <div class="composer">
+    <div
+      class="composer"
+      id="composer">
 
       <div class="composer-title">
 
@@ -690,11 +1026,12 @@
         id="authorName"
         type="text"
         maxlength="80"
-        placeholder="Enter your name">
+        placeholder="Your name"
+        readonly>
 
 
       <div class="name-note">
-        Your name will appear with your posts and comments.
+        This name comes from your NLC Community account.
       </div>
 
 
@@ -708,6 +1045,7 @@
         <div class="composer-hint">
           Keep it beneficial and respectful.
         </div>
+
 
         <button
           class="post-button"
@@ -776,50 +1114,691 @@
 
 
     // ==========================================
-    // NAME MEMORY
+    // CURRENT USER
     // ==========================================
 
-    const savedName =
-      localStorage.getItem('nlc-author-name');
+    let currentUser = null;
 
-    if (savedName) {
 
-      document.getElementById(
-        'authorName'
-      ).value = savedName;
+    // ==========================================
+    // AUTH MESSAGE
+    // ==========================================
+
+    function setAuthMessage(message, isError = false) {
+
+      const element =
+        document.getElementById('authMessage');
+
+      element.textContent = message;
+
+      element.classList.toggle(
+        'error',
+        isError
+      );
 
     }
 
 
     // ==========================================
-    // GET AUTHOR NAME
+    // NORMAL MESSAGE
     // ==========================================
 
-    function getAuthorName() {
+    function setMessage(message, isError = false) {
+
+      const element =
+        document.getElementById('message');
+
+      element.textContent = message;
+
+      element.classList.toggle(
+        'error',
+        isError
+      );
+
+    }
+
+
+    // ==========================================
+    // SHOW LOGIN
+    // ==========================================
+
+    function showLogin() {
+
+      document.getElementById(
+        'loginForm'
+      ).style.display = 'block';
+
+      document.getElementById(
+        'signupForm'
+      ).style.display = 'none';
+
+
+      document.getElementById(
+        'loginTab'
+      ).classList.add('active');
+
+      document.getElementById(
+        'signupTab'
+      ).classList.remove('active');
+
+
+      setAuthMessage('');
+
+    }
+
+
+    // ==========================================
+    // SHOW SIGNUP
+    // ==========================================
+
+    function showSignup() {
+
+      document.getElementById(
+        'loginForm'
+      ).style.display = 'none';
+
+      document.getElementById(
+        'signupForm'
+      ).style.display = 'block';
+
+
+      document.getElementById(
+        'loginTab'
+      ).classList.remove('active');
+
+      document.getElementById(
+        'signupTab'
+      ).classList.add('active');
+
+
+      setAuthMessage('');
+
+    }
+
+
+    // ==========================================
+    // SIGN UP
+    // ==========================================
+
+    async function signUp() {
 
       const nameInput =
-        document.getElementById('authorName');
+        document.getElementById('signupName');
+
+      const emailInput =
+        document.getElementById('signupEmail');
+
+      const passwordInput =
+        document.getElementById('signupPassword');
+
+      const button =
+        document.getElementById('signupButton');
+
 
       const name =
         nameInput.value.trim();
 
-      return name;
+      const email =
+        emailInput.value.trim();
 
-    }
+      const password =
+        passwordInput.value;
 
 
-    // ==========================================
-    // SAVE AUTHOR NAME
-    // ==========================================
+      if (!name) {
 
-    function saveAuthorName(name) {
+        setAuthMessage(
+          'Please enter your full name.',
+          true
+        );
 
-      localStorage.setItem(
-        'nlc-author-name',
-        name
+        nameInput.focus();
+
+        return;
+      }
+
+
+      if (!email) {
+
+        setAuthMessage(
+          'Please enter your email address.',
+          true
+        );
+
+        emailInput.focus();
+
+        return;
+      }
+
+
+      if (!password) {
+
+        setAuthMessage(
+          'Please create a password.',
+          true
+        );
+
+        passwordInput.focus();
+
+        return;
+      }
+
+
+      if (password.length < 6) {
+
+        setAuthMessage(
+          'Your password must be at least 6 characters.',
+          true
+        );
+
+        passwordInput.focus();
+
+        return;
+      }
+
+
+      button.disabled = true;
+
+      button.textContent =
+        'Creating Account...';
+
+      setAuthMessage('');
+
+
+      const { data, error } =
+        await supabaseClient.auth.signUp({
+
+          email: email,
+
+          password: password,
+
+          options: {
+
+            data: {
+              full_name: name
+            }
+
+          }
+
+        });
+
+
+      if (error) {
+
+        console.error(
+          'Sign up error:',
+          error
+        );
+
+        setAuthMessage(
+          error.message,
+          true
+        );
+
+        button.disabled = false;
+
+        button.textContent =
+          'Create Account';
+
+        return;
+      }
+
+
+      button.disabled = false;
+
+      button.textContent =
+        'Create Account';
+
+
+      /*
+       * Because email confirmation is enabled,
+       * Supabase normally returns a user but no active session.
+       */
+
+      if (data.user && !data.session) {
+
+        setAuthMessage(
+          'Account created. Please check your email and confirm your address before signing in.'
+        );
+
+        return;
+      }
+
+
+      setAuthMessage(
+        'Account created successfully.'
       );
 
     }
+
+
+    // ==========================================
+    // SIGN IN
+    // ==========================================
+
+    async function signIn() {
+
+      const emailInput =
+        document.getElementById('loginEmail');
+
+      const passwordInput =
+        document.getElementById('loginPassword');
+
+      const button =
+        document.getElementById('loginButton');
+
+
+      const email =
+        emailInput.value.trim();
+
+      const password =
+        passwordInput.value;
+
+
+      if (!email) {
+
+        setAuthMessage(
+          'Please enter your email address.',
+          true
+        );
+
+        emailInput.focus();
+
+        return;
+      }
+
+
+      if (!password) {
+
+        setAuthMessage(
+          'Please enter your password.',
+          true
+        );
+
+        passwordInput.focus();
+
+        return;
+      }
+
+
+      button.disabled = true;
+
+      button.textContent =
+        'Signing In...';
+
+      setAuthMessage('');
+
+
+      const { data, error } =
+        await supabaseClient.auth.signInWithPassword({
+
+          email: email,
+
+          password: password
+
+        });
+
+
+      if (error) {
+
+        console.error(
+          'Sign in error:',
+          error
+        );
+
+        setAuthMessage(
+          error.message,
+          true
+        );
+
+        button.disabled = false;
+
+        button.textContent =
+          'Sign In';
+
+        return;
+      }
+
+
+      button.disabled = false;
+
+      button.textContent =
+        'Sign In';
+
+
+      if (data.user) {
+
+        await handleUserSession(
+          data.user
+        );
+
+      }
+
+    }
+
+
+    // ==========================================
+    // SIGN OUT
+    // ==========================================
+
+    async function signOut() {
+
+      const { error } =
+        await supabaseClient.auth.signOut();
+
+
+      if (error) {
+
+        console.error(
+          'Sign out error:',
+          error
+        );
+
+        alert(
+          'Unable to sign out.\n\n' +
+          error.message
+        );
+
+        return;
+      }
+
+
+      currentUser = null;
+
+      updateAuthUI(null);
+
+    }
+
+
+    // ==========================================
+    // GET USER NAME
+    // ==========================================
+
+    function getUserName(user) {
+
+      if (!user) {
+        return 'Community Member';
+      }
+
+
+      const metadata =
+        user.user_metadata || {};
+
+
+      return (
+        metadata.full_name ||
+        metadata.name ||
+        user.email?.split('@')[0] ||
+        'Community Member'
+      );
+
+    }
+
+
+    // ==========================================
+    // UPDATE AUTH UI
+    // ==========================================
+
+    function updateAuthUI(user) {
+
+      const loggedOut =
+        document.getElementById(
+          'authLoggedOut'
+        );
+
+      const loggedIn =
+        document.getElementById(
+          'authLoggedIn'
+        );
+
+
+      const composer =
+        document.getElementById(
+          'composer'
+        );
+
+
+      const nameInput =
+        document.getElementById(
+          'authorName'
+        );
+
+
+      const commentInputs =
+        document.querySelectorAll(
+          '.comment-box input'
+        );
+
+
+      const commentButtons =
+        document.querySelectorAll(
+          '.comment-button'
+        );
+
+
+      const likeButtons =
+        document.querySelectorAll(
+          '.like-button'
+        );
+
+
+      if (user) {
+
+        const name =
+          getUserName(user);
+
+
+        loggedOut.style.display =
+          'none';
+
+        loggedIn.style.display =
+          'block';
+
+
+        document.getElementById(
+          'currentUserName'
+        ).textContent =
+          name;
+
+
+        composer.style.display =
+          'block';
+
+
+        nameInput.value =
+          name;
+
+
+        /*
+         * Make sure the name is not edited
+         * independently from the account.
+         */
+
+        nameInput.readOnly =
+          true;
+
+
+        document.getElementById(
+          'postContent'
+        ).disabled =
+          false;
+
+
+        document.getElementById(
+          'postButton'
+        ).disabled =
+          false;
+
+
+        commentInputs.forEach(
+          input => {
+
+            input.disabled =
+              false;
+
+          }
+        );
+
+
+        commentButtons.forEach(
+          button => {
+
+            button.disabled =
+              false;
+
+          }
+        );
+
+
+        likeButtons.forEach(
+          button => {
+
+            button.disabled =
+              false;
+
+          }
+        );
+
+      } else {
+
+        loggedOut.style.display =
+          'block';
+
+        loggedIn.style.display =
+          'none';
+
+
+        composer.style.display =
+          'none';
+
+
+        commentInputs.forEach(
+          input => {
+
+            input.disabled =
+              true;
+
+          }
+        );
+
+
+        commentButtons.forEach(
+          button => {
+
+            button.disabled =
+              true;
+
+          }
+        );
+
+
+        likeButtons.forEach(
+          button => {
+
+            button.disabled =
+              true;
+
+          }
+        );
+
+      }
+
+    }
+
+
+    // ==========================================
+    // HANDLE USER SESSION
+    // ==========================================
+
+    async function handleUserSession(user) {
+
+      currentUser =
+        user;
+
+
+      updateAuthUI(
+        user
+      );
+
+
+      await refreshLikeStates();
+
+    }
+
+
+    // ==========================================
+    // INITIAL AUTH CHECK
+    // ==========================================
+
+    async function initializeAuth() {
+
+      const {
+        data,
+        error
+      } =
+        await supabaseClient.auth.getSession();
+
+
+      if (error) {
+
+        console.error(
+          'Session error:',
+          error
+        );
+
+        updateAuthUI(null);
+
+        return;
+
+      }
+
+
+      currentUser =
+        data.session
+          ? data.session.user
+          : null;
+
+
+      updateAuthUI(
+        currentUser
+      );
+
+
+      if (currentUser) {
+
+        await refreshLikeStates();
+
+      }
+
+    }
+
+
+    // ==========================================
+    // AUTH STATE LISTENER
+    // ==========================================
+
+    supabaseClient.auth.onAuthStateChange(
+      async function(event, session) {
+
+        currentUser =
+          session
+            ? session.user
+            : null;
+
+
+        updateAuthUI(
+          currentUser
+        );
+
+
+        if (currentUser) {
+
+          await refreshLikeStates();
+
+        }
+
+      }
+    );
 
 
     // ==========================================
@@ -832,16 +1811,28 @@
         return '?';
       }
 
+
       const parts =
         name.trim().split(/\s+/);
 
+
       if (parts.length === 1) {
-        return parts[0].substring(0, 1).toUpperCase();
+
+        return parts[0]
+          .substring(0, 1)
+          .toUpperCase();
+
       }
 
+
       return (
-        parts[0].substring(0, 1) +
-        parts[parts.length - 1].substring(0, 1)
+
+        parts[0]
+          .substring(0, 1) +
+
+        parts[parts.length - 1]
+          .substring(0, 1)
+
       ).toUpperCase();
 
     }
@@ -855,6 +1846,7 @@
 
       const postsContainer =
         document.getElementById('posts');
+
 
       const { data, error } =
         await supabaseClient
@@ -872,10 +1864,13 @@
           error
         );
 
+
         postsContainer.innerHTML =
           '<div class="empty-state">Unable to load posts.</div>';
 
+
         return;
+
       }
 
 
@@ -884,7 +1879,9 @@
         postsContainer.innerHTML =
           '<div class="empty-state">No posts yet. Be the first to share something!</div>';
 
+
         return;
+
       }
 
 
@@ -894,10 +1891,14 @@
       for (const post of data) {
 
         const authorName =
-          post.author_name || 'Community Member';
+          post.author_name ||
+          'Community Member';
+
 
         const initials =
-          getInitials(authorName);
+          getInitials(
+            authorName
+          );
 
 
         html += `
@@ -911,11 +1912,13 @@
                 ${escapeHtml(initials)}
               </div>
 
+
               <div class="author-info">
 
                 <div class="author-name">
                   ${escapeHtml(authorName)}
                 </div>
+
 
                 <div class="author-role">
                   Community member
@@ -947,6 +1950,7 @@
                 onclick="likePost('${post.id}')">
 
                 ❤️ Like
+
                 <span id="like-count-${post.id}">
                   0
                 </span>
@@ -1004,18 +2008,31 @@
       }
 
 
-      postsContainer.innerHTML = html;
+      postsContainer.innerHTML =
+        html;
 
-
-      // Load likes and comments
 
       for (const post of data) {
 
-        loadLikeCount(post.id);
+        loadLikeCount(
+          post.id
+        );
 
-        loadComments(post.id);
+        loadComments(
+          post.id
+        );
 
-        checkIfLiked(post.id);
+      }
+
+
+      updateAuthUI(
+        currentUser
+      );
+
+
+      if (currentUser) {
+
+        await refreshLikeStates();
 
       }
 
@@ -1028,14 +2045,28 @@
 
     async function createPost() {
 
+      if (!currentUser) {
+
+        setMessage(
+          'Please sign in before creating a post.',
+          true
+        );
+
+        return;
+
+      }
+
+
       const textarea =
-        document.getElementById('postContent');
+        document.getElementById(
+          'postContent'
+        );
+
 
       const button =
-        document.getElementById('postButton');
-
-      const message =
-        document.getElementById('message');
+        document.getElementById(
+          'postButton'
+        );
 
 
       const content =
@@ -1043,40 +2074,32 @@
 
 
       const authorName =
-        getAuthorName();
-
-
-      if (!authorName) {
-
-        message.textContent =
-          'Please enter your name first.';
-
-        document.getElementById(
-          'authorName'
-        ).focus();
-
-        return;
-      }
+        getUserName(
+          currentUser
+        );
 
 
       if (!content) {
 
-        message.textContent =
-          'Please write something first.';
+        setMessage(
+          'Please write something first.',
+          true
+        );
 
         textarea.focus();
 
         return;
+
       }
 
 
-      saveAuthorName(authorName);
+      button.disabled =
+        true;
 
 
-      button.disabled = true;
-
-      message.textContent =
-        'Posting...';
+      setMessage(
+        'Posting...'
+      );
 
 
       const { error } =
@@ -1085,7 +2108,8 @@
           .insert([
             {
               content: content,
-              author_name: authorName
+              author_name: authorName,
+              user_id: currentUser.id
             }
           ]);
 
@@ -1097,22 +2121,34 @@
           error
         );
 
-        message.textContent =
-          'Unable to create post: ' +
-          error.message;
 
-        button.disabled = false;
+        setMessage(
+          'Unable to create post: ' +
+          error.message,
+          true
+        );
+
+
+        button.disabled =
+          false;
+
 
         return;
+
       }
 
 
-      textarea.value = '';
+      textarea.value =
+        '';
 
-      message.textContent =
-        'Posted!';
 
-      button.disabled = false;
+      setMessage(
+        'Posted!'
+      );
+
+
+      button.disabled =
+        false;
 
 
       await loadPosts();
@@ -1154,15 +2190,20 @@
           error
         );
 
+
         container.innerHTML =
           '<div class="no-comments">Unable to load comments.</div>';
 
+
         return;
+
       }
 
 
       const commentCount =
-        data ? data.length : 0;
+        data
+          ? data.length
+          : 0;
 
 
       const title =
@@ -1184,56 +2225,64 @@
         container.innerHTML =
           '<div class="no-comments">No comments yet.</div>';
 
+
         return;
+
       }
 
 
       container.innerHTML =
-        data.map(comment => {
+        data.map(
+          comment => {
 
-          const commentAuthor =
-            comment.author_name ||
-            'Community Member';
-
-          const initials =
-            getInitials(commentAuthor);
+            const commentAuthor =
+              comment.author_name ||
+              'Community Member';
 
 
-          return `
+            const initials =
+              getInitials(
+                commentAuthor
+              );
 
-            <div class="comment">
 
-              <div class="comment-author">
+            return `
 
-                <div class="comment-avatar">
-                  ${escapeHtml(initials)}
+              <div class="comment">
+
+                <div class="comment-author">
+
+                  <div class="comment-avatar">
+                    ${escapeHtml(initials)}
+                  </div>
+
+
+                  <div class="comment-author-name">
+                    ${escapeHtml(commentAuthor)}
+                  </div>
+
                 </div>
 
-                <div class="comment-author-name">
-                  ${escapeHtml(commentAuthor)}
+
+                <div class="comment-content">
+                  ${escapeHtml(comment.content)}
+                </div>
+
+
+                <div class="comment-date">
+
+                  ${new Date(
+                    comment.created_at
+                  ).toLocaleString()}
+
                 </div>
 
               </div>
 
+            `;
 
-              <div class="comment-content">
-                ${escapeHtml(comment.content)}
-              </div>
-
-
-              <div class="comment-date">
-
-                ${new Date(
-                  comment.created_at
-                ).toLocaleString()}
-
-              </div>
-
-            </div>
-
-          `;
-
-        }).join('');
+          }
+        ).join('');
 
     }
 
@@ -1243,6 +2292,17 @@
     // ==========================================
 
     async function createComment(postId) {
+
+      if (!currentUser) {
+
+        alert(
+          'Please sign in before commenting.'
+        );
+
+        return;
+
+      }
+
 
       const input =
         document.getElementById(
@@ -1265,33 +2325,20 @@
         input.value.trim();
 
 
-      const authorName =
-        getAuthorName();
-
-
-      if (!authorName) {
-
-        alert(
-          'Please enter your name at the top before commenting.'
-        );
-
-        document.getElementById(
-          'authorName'
-        ).focus();
-
-        return;
-      }
-
-
       if (!content) {
         return;
       }
 
 
-      saveAuthorName(authorName);
+      const authorName =
+        getUserName(
+          currentUser
+        );
 
 
-      button.disabled = true;
+      button.disabled =
+        true;
+
 
       button.textContent =
         'Adding...';
@@ -1304,7 +2351,8 @@
             {
               post_id: postId,
               content: content,
-              author_name: authorName
+              author_name: authorName,
+              user_id: currentUser.id
             }
           ]);
 
@@ -1316,29 +2364,41 @@
           error
         );
 
+
         alert(
           'Comment could not be added.\n\n' +
           error.message
         );
 
-        button.disabled = false;
+
+        button.disabled =
+          false;
+
 
         button.textContent =
           'Comment';
 
+
         return;
+
       }
 
 
-      input.value = '';
+      input.value =
+        '';
 
-      button.disabled = false;
+
+      button.disabled =
+        false;
+
 
       button.textContent =
         'Comment';
 
 
-      await loadComments(postId);
+      await loadComments(
+        postId
+      );
 
     }
 
@@ -1377,10 +2437,13 @@
           error
         );
 
+
         countElement.textContent =
           '0';
 
+
         return;
+
       }
 
 
@@ -1396,6 +2459,17 @@
 
     async function likePost(postId) {
 
+      if (!currentUser) {
+
+        alert(
+          'Please sign in before liking a post.'
+        );
+
+        return;
+
+      }
+
+
       const button =
         document.getElementById(
           `like-button-${postId}`
@@ -1407,20 +2481,8 @@
       }
 
 
-      const alreadyLiked =
-        localStorage.getItem(
-          `liked-${postId}`
-        );
-
-
-      if (alreadyLiked === 'true') {
-
-        return;
-
-      }
-
-
-      button.disabled = true;
+      button.disabled =
+        true;
 
 
       const { error } =
@@ -1428,7 +2490,8 @@
           .from('likes')
           .insert([
             {
-              post_id: postId
+              post_id: postId,
+              user_id: currentUser.id
             }
           ]);
 
@@ -1440,24 +2503,55 @@
           error
         );
 
+
+        /*
+         * If the database unique constraint
+         * catches a duplicate like, simply
+         * show the post as already liked.
+         */
+
+        if (
+          error.code === '23505'
+        ) {
+
+          button.classList.add(
+            'liked'
+          );
+
+
+          button.innerHTML =
+            '❤️ Liked ' +
+            `<span id="like-count-${postId}"></span>`;
+
+
+          await loadLikeCount(
+            postId
+          );
+
+
+          return;
+
+        }
+
+
         alert(
           'Unable to like this post.\n\n' +
           error.message
         );
 
-        button.disabled = false;
+
+        button.disabled =
+          false;
+
 
         return;
+
       }
 
 
-      localStorage.setItem(
-        `liked-${postId}`,
-        'true'
+      button.classList.add(
+        'liked'
       );
-
-
-      button.classList.add('liked');
 
 
       button.innerHTML =
@@ -1465,19 +2559,23 @@
         `<span id="like-count-${postId}"></span>`;
 
 
-      button.disabled = false;
-
-
-      await loadLikeCount(postId);
+      await loadLikeCount(
+        postId
+      );
 
     }
 
 
     // ==========================================
-    // CHECK IF ALREADY LIKED
+    // CHECK IF CURRENT USER LIKED
     // ==========================================
 
-    function checkIfLiked(postId) {
+    async function checkIfLiked(postId) {
+
+      if (!currentUser) {
+        return;
+      }
+
 
       const button =
         document.getElementById(
@@ -1490,20 +2588,88 @@
       }
 
 
-      const alreadyLiked =
-        localStorage.getItem(
-          `liked-${postId}`
+      const { data, error } =
+        await supabaseClient
+          .from('likes')
+          .select('id')
+          .eq('post_id', postId)
+          .eq('user_id', currentUser.id)
+          .maybeSingle();
+
+
+      if (error) {
+
+        console.error(
+          'Check like error:',
+          error
         );
 
+        return;
 
-      if (alreadyLiked === 'true') {
+      }
 
-        button.classList.add('liked');
+
+      if (data) {
+
+        button.classList.add(
+          'liked'
+        );
 
 
         button.innerHTML =
           '❤️ Liked ' +
           `<span id="like-count-${postId}"></span>`;
+
+
+        button.disabled =
+          true;
+
+      }
+
+    }
+
+
+    // ==========================================
+    // REFRESH ALL LIKE STATES
+    // ==========================================
+
+    async function refreshLikeStates() {
+
+      if (!currentUser) {
+        return;
+      }
+
+
+      const buttons =
+        document.querySelectorAll(
+          '.like-button'
+        );
+
+
+      for (const button of buttons) {
+
+        const id =
+          button.id;
+
+
+        const match =
+          id.match(
+            /^like-button-(.+)$/
+          );
+
+
+        if (!match) {
+          continue;
+        }
+
+
+        const postId =
+          match[1];
+
+
+        await checkIfLiked(
+          postId
+        );
 
       }
 
@@ -1514,13 +2680,20 @@
     // ENTER KEY FOR COMMENTS
     // ==========================================
 
-    function handleCommentKey(event, postId) {
+    function handleCommentKey(
+      event,
+      postId
+    ) {
 
-      if (event.key === 'Enter') {
+      if (
+        event.key === 'Enter'
+      ) {
 
         event.preventDefault();
 
-        createComment(postId);
+        createComment(
+          postId
+        );
 
       }
 
@@ -1550,7 +2723,9 @@
           button.dataset.postId;
 
 
-        createComment(postId);
+        createComment(
+          postId
+        );
 
       }
     );
@@ -1563,9 +2738,14 @@
     function escapeHtml(text) {
 
       const div =
-        document.createElement('div');
+        document.createElement(
+          'div'
+        );
 
-      div.textContent = text;
+
+      div.textContent =
+        text;
+
 
       return div.innerHTML;
 
@@ -1573,10 +2753,19 @@
 
 
     // ==========================================
-    // START
+    // START APPLICATION
     // ==========================================
 
-    loadPosts();
+    async function startApp() {
+
+      await initializeAuth();
+
+      await loadPosts();
+
+    }
+
+
+    startApp();
 
   </script>
 
