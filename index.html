@@ -74,6 +74,46 @@
       margin-top: 10px;
     }
 
+    .comments {
+      margin-top: 18px;
+      padding-top: 15px;
+      border-top: 1px solid #eee;
+    }
+
+    .comment {
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .comment:last-child {
+      border-bottom: none;
+    }
+
+    .comment-date {
+      font-size: 11px;
+      color: #999;
+      margin-top: 3px;
+    }
+
+    .comment-box {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .comment-box input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .comment-box button {
+      margin-top: 0;
+      padding: 10px 15px;
+    }
+
     .message {
       margin-top: 10px;
       font-size: 14px;
@@ -89,7 +129,8 @@
   <div class="composer">
     <h2>Share with the community</h2>
 
-    <textarea id="postContent"
+    <textarea
+      id="postContent"
       placeholder="What's on your mind?"></textarea>
 
     <button onclick="createPost()">Post</button>
@@ -104,22 +145,36 @@
   </div>
 
   <script>
-    const SUPABASE_URL = 'https://zbogfymmlnifzoasemlt.supabase.co';
 
-    const SUPABASE_KEY = 'sb_publishable_77b2DtF2XQLyfKEg7ZBNYA_odCDFWVJ';
+    const SUPABASE_URL =
+      'https://zbogfymmlnifzoasemlt.supabase.co';
 
-    const supabaseClient = window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_KEY
-    );
+    const SUPABASE_KEY =
+      'PASTE_YOUR_PUBLISHABLE_KEY_HERE';
+
+    const supabaseClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
+
+
+    // -------------------------
+    // LOAD POSTS
+    // -------------------------
 
     async function loadPosts() {
-      const { data, error } = await supabaseClient
-        .from('posts')
-        .select('*')
-        .order('created_at', { ascending: false });
+
+      const { data, error } =
+        await supabaseClient
+          .from('posts')
+          .select('*')
+          .order('created_at', {
+            ascending: false
+          });
 
       if (error) {
+
         document.getElementById('posts').innerHTML =
           '<p>Unable to load posts.</p>';
 
@@ -128,60 +183,257 @@
       }
 
       if (!data || data.length === 0) {
+
         document.getElementById('posts').innerHTML =
           '<p>No posts yet. Be the first to share something!</p>';
 
         return;
       }
 
-      document.getElementById('posts').innerHTML = data.map(post => `
-        <div class="post">
-          <div>${escapeHtml(post.content)}</div>
-          <div class="post-date">
-            ${new Date(post.created_at).toLocaleString()}
+      let html = '';
+
+      for (const post of data) {
+
+        html += `
+          <div class="post">
+
+            <div>${escapeHtml(post.content)}</div>
+
+            <div class="post-date">
+              ${new Date(post.created_at).toLocaleString()}
+            </div>
+
+            <div class="comments">
+
+              <strong>Comments</strong>
+
+              <div id="comments-${post.id}">
+                Loading comments...
+              </div>
+
+              <div class="comment-box">
+
+                <input
+                  id="comment-${post.id}"
+                  type="text"
+                  placeholder="Write a comment..."
+                >
+
+                <button
+                  onclick="createComment('${post.id}')">
+                  Send
+                </button>
+
+              </div>
+
+            </div>
+
           </div>
-        </div>
-      `).join('');
+        `;
+
+      }
+
+      document.getElementById('posts').innerHTML = html;
+
+
+      // Load comments for each post
+
+      for (const post of data) {
+        loadComments(post.id);
+      }
+
     }
 
-    async function createPost() {
-      const textarea = document.getElementById('postContent');
-      const message = document.getElementById('message');
 
-      const content = textarea.value.trim();
+    // -------------------------
+    // CREATE POST
+    // -------------------------
+
+    async function createPost() {
+
+      const textarea =
+        document.getElementById('postContent');
+
+      const message =
+        document.getElementById('message');
+
+      const content =
+        textarea.value.trim();
 
       if (!content) {
-        message.textContent = 'Please write something first.';
+
+        message.textContent =
+          'Please write something first.';
+
         return;
       }
 
-      message.textContent = 'Posting...';
+      message.textContent =
+        'Posting...';
 
-      const { error } = await supabaseClient
-        .from('posts')
-        .insert([
-          { content: content }
-        ]);
+
+      const { error } =
+        await supabaseClient
+          .from('posts')
+          .insert([
+            { content: content }
+          ]);
+
 
       if (error) {
+
         console.error(error);
-        message.textContent = 'Unable to create post.';
+
+        message.textContent =
+          'Unable to create post.';
+
         return;
       }
 
+
       textarea.value = '';
+
       message.textContent = 'Posted!';
 
       loadPosts();
+
     }
+
+
+    // -------------------------
+    // LOAD COMMENTS
+    // -------------------------
+
+    async function loadComments(postId) {
+
+      const { data, error } =
+        await supabaseClient
+          .from('comments')
+          .select('*')
+          .eq('post_id', postId)
+          .order('created_at', {
+            ascending: true
+          });
+
+
+      const container =
+        document.getElementById(
+          `comments-${postId}`
+        );
+
+
+      if (error) {
+
+        container.innerHTML =
+          '<p>Unable to load comments.</p>';
+
+        console.error(error);
+
+        return;
+      }
+
+
+      if (!data || data.length === 0) {
+
+        container.innerHTML =
+          '<p style="color:#888;">No comments yet.</p>';
+
+        return;
+      }
+
+
+      container.innerHTML =
+        data.map(comment => `
+
+          <div class="comment">
+
+            <div>
+              ${escapeHtml(comment.content)}
+            </div>
+
+            <div class="comment-date">
+              ${new Date(
+                comment.created_at
+              ).toLocaleString()}
+            </div>
+
+          </div>
+
+        `).join('');
+
+    }
+
+
+    // -------------------------
+    // CREATE COMMENT
+    // -------------------------
+
+    async function createComment(postId) {
+
+      const input =
+        document.getElementById(
+          `comment-${postId}`
+        );
+
+      const content =
+        input.value.trim();
+
+
+      if (!content) {
+        return;
+      }
+
+
+      const { error } =
+        await supabaseClient
+          .from('comments')
+          .insert([
+            {
+              post_id: postId,
+              content: content
+            }
+          ]);
+
+
+      if (error) {
+
+        console.error(error);
+
+        alert('Unable to add comment.');
+
+        return;
+      }
+
+
+      input.value = '';
+
+      loadComments(postId);
+
+    }
+
+
+    // -------------------------
+    // SECURITY
+    // -------------------------
 
     function escapeHtml(text) {
-      const div = document.createElement('div');
+
+      const div =
+        document.createElement('div');
+
       div.textContent = text;
+
       return div.innerHTML;
+
     }
 
+
+    // -------------------------
+    // START
+    // -------------------------
+
     loadPosts();
+
   </script>
 
 </body>
