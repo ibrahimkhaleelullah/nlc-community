@@ -81,7 +81,6 @@
 
     .post-actions {
       display: flex;
-      gap: 20px;
       align-items: center;
       margin-top: 15px;
       padding-top: 12px;
@@ -95,6 +94,7 @@
       padding: 5px;
       margin: 0;
       font-size: 15px;
+      cursor: pointer;
     }
 
     .like-button:hover {
@@ -105,6 +105,7 @@
     .like-button.liked {
       color: #16875d;
       font-weight: bold;
+      cursor: default;
     }
 
     .comments {
@@ -283,7 +284,7 @@
 
                 ❤️ Like
                 <span id="like-count-${post.id}">
-                  ...
+                  0
                 </span>
 
               </button>
@@ -556,12 +557,6 @@
       }
 
 
-      console.log(
-        'Comment added:',
-        data
-      );
-
-
       input.value = '';
 
       button.disabled = false;
@@ -633,7 +628,23 @@
         );
 
 
-      // Prevent repeated clicks
+      // IMPORTANT:
+      // Check BEFORE inserting.
+      // This prevents repeated likes
+      // from the same browser.
+
+      const alreadyLiked =
+        localStorage.getItem(
+          `liked-${postId}`
+        );
+
+
+      if (alreadyLiked === 'true') {
+
+        return;
+
+      }
+
 
       button.disabled = true;
 
@@ -666,13 +677,15 @@
       }
 
 
-      // Remember that this browser liked it
+      // Remember this browser has liked it
 
       localStorage.setItem(
         `liked-${postId}`,
         'true'
       );
 
+
+      // Change button appearance
 
       button.classList.add('liked');
 
@@ -690,7 +703,7 @@
 
 
     // ==========================================
-    // CHECK IF THIS BROWSER LIKED
+    // CHECK IF ALREADY LIKED
     // ==========================================
 
     function checkIfLiked(postId) {
