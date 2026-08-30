@@ -956,7 +956,7 @@
             </div>
 
             <div class="logged-in-subtitle">
-              You're signed in to the NLC Community.
+              Your community profile is connected.
             </div>
 
           </div>
@@ -1118,6 +1118,7 @@
     // ==========================================
 
     let currentUser = null;
+    let currentProfile = null;
 
 
     // ==========================================
@@ -1504,9 +1505,38 @@
 
 
       currentUser = null;
+      currentProfile = null;
 
       updateAuthUI(null);
 
+    }
+
+
+    // ==========================================
+    // PROFILE
+    // ==========================================
+
+    async function loadCurrentProfile(user) {
+
+      currentProfile = null;
+
+      if (!user) {
+        return;
+      }
+
+      const { data, error } =
+        await supabaseClient
+          .from('profiles')
+          .select('id, full_name, bio, avatar_url')
+          .eq('id', user.id)
+          .maybeSingle();
+
+      if (error) {
+        console.error('Profile loading error:', error);
+        return;
+      }
+
+      currentProfile = data || null;
     }
 
 
@@ -1520,10 +1550,12 @@
         return 'Community Member';
       }
 
+      if (currentProfile && currentProfile.full_name) {
+        return currentProfile.full_name.trim();
+      }
 
       const metadata =
         user.user_metadata || {};
-
 
       return (
         metadata.full_name ||
@@ -1531,7 +1563,6 @@
         user.email?.split('@')[0] ||
         'Community Member'
       );
-
     }
 
 
@@ -1715,11 +1746,11 @@
       currentUser =
         user;
 
+      await loadCurrentProfile(user);
 
       updateAuthUI(
         user
       );
-
 
       await refreshLikeStates();
 
@@ -1758,6 +1789,7 @@
           ? data.session.user
           : null;
 
+      await loadCurrentProfile(currentUser);
 
       updateAuthUI(
         currentUser
@@ -1785,6 +1817,7 @@
             ? session.user
             : null;
 
+        await loadCurrentProfile(currentUser);
 
         updateAuthUI(
           currentUser
