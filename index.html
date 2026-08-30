@@ -726,9 +726,9 @@
 
             <div class="comments">
 
-              <div class="comments-title">
-                Comments
-              </div>
+            <div class="comments-title" id="comments-title-${post.id}">
+            Comments
+            </div>
 
               <div id="comments-${post.id}">
                 Loading comments...
@@ -899,6 +899,16 @@
         return;
       }
 
+      const commentCount = data ? data.length : 0;
+
+const title = document.getElementById(
+    `comments-title-${postId}`
+);
+
+if (title) {
+    title.textContent =
+        `💬 ${commentCount} Comment${commentCount === 1 ? '' : 's'}`;
+}
 
       if (!data || data.length === 0) {
 
