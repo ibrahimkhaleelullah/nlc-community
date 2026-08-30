@@ -79,8 +79,36 @@
       margin-top: 10px;
     }
 
+    .post-actions {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      margin-top: 15px;
+      padding-top: 12px;
+      border-top: 1px solid #eee;
+    }
+
+    .like-button {
+      background: none;
+      color: #555;
+      border: none;
+      padding: 5px;
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .like-button:hover {
+      color: #16875d;
+      opacity: 1;
+    }
+
+    .like-button.liked {
+      color: #16875d;
+      font-weight: bold;
+    }
+
     .comments {
-      margin-top: 18px;
+      margin-top: 15px;
       padding-top: 15px;
       border-top: 1px solid #eee;
     }
@@ -113,6 +141,7 @@
       border-radius: 6px;
       font-size: 14px;
       min-width: 0;
+      box-sizing: border-box;
     }
 
     .comment-box button {
@@ -179,7 +208,6 @@
     const SUPABASE_KEY =
       'sb_publishable_77b2DtF2XQLyfKEg7ZBNYA_odCDFWVJ';
 
-
     const supabaseClient =
       window.supabase.createClient(
         SUPABASE_URL,
@@ -196,7 +224,6 @@
       const postsContainer =
         document.getElementById('posts');
 
-
       const { data, error } =
         await supabaseClient
           .from('posts')
@@ -204,7 +231,6 @@
           .order('created_at', {
             ascending: false
           });
-
 
       if (error) {
 
@@ -219,7 +245,6 @@
         return;
       }
 
-
       if (!data || data.length === 0) {
 
         postsContainer.innerHTML =
@@ -228,9 +253,7 @@
         return;
       }
 
-
       let html = '';
-
 
       for (const post of data) {
 
@@ -246,6 +269,25 @@
               ${new Date(
                 post.created_at
               ).toLocaleString()}
+            </div>
+
+
+            <!-- LIKE -->
+
+            <div class="post-actions">
+
+              <button
+                class="like-button"
+                id="like-button-${post.id}"
+                onclick="likePost('${post.id}')">
+
+                ❤️ Like
+                <span id="like-count-${post.id}">
+                  ...
+                </span>
+
+              </button>
+
             </div>
 
 
@@ -272,7 +314,9 @@
                 <button
                   id="comment-button-${post.id}"
                   onclick="createComment('${post.id}')">
+
                   Comment
+
                 </button>
 
               </div>
@@ -284,15 +328,18 @@
         `;
       }
 
-
       postsContainer.innerHTML = html;
 
 
-      // Load comments for each post
+      // Load likes and comments
 
       for (const post of data) {
 
+        loadLikeCount(post.id);
+
         loadComments(post.id);
+
+        checkIfLiked(post.id);
 
       }
 
@@ -314,10 +361,8 @@
       const message =
         document.getElementById('message');
 
-
       const content =
         textarea.value.trim();
-
 
       if (!content) {
 
@@ -326,7 +371,6 @@
 
         return;
       }
-
 
       button.disabled = true;
 
@@ -366,7 +410,6 @@
       message.textContent =
         'Posted!';
 
-
       button.disabled = false;
 
 
@@ -385,7 +428,6 @@
         document.getElementById(
           `comments-${postId}`
         );
-
 
       if (!container) {
         return;
@@ -522,7 +564,6 @@
 
       input.value = '';
 
-
       button.disabled = false;
 
       button.textContent =
@@ -530,6 +571,155 @@
 
 
       await loadComments(postId);
+
+    }
+
+
+    // ==========================================
+    // LOAD LIKE COUNT
+    // ==========================================
+
+    async function loadLikeCount(postId) {
+
+      const countElement =
+        document.getElementById(
+          `like-count-${postId}`
+        );
+
+      if (!countElement) {
+        return;
+      }
+
+
+      const { count, error } =
+        await supabaseClient
+          .from('likes')
+          .select('*', {
+            count: 'exact',
+            head: true
+          })
+          .eq('post_id', postId);
+
+
+      if (error) {
+
+        console.error(
+          'Like count error:',
+          error
+        );
+
+        countElement.textContent =
+          '0';
+
+        return;
+      }
+
+
+      countElement.textContent =
+        count || 0;
+
+    }
+
+
+    // ==========================================
+    // LIKE A POST
+    // ==========================================
+
+    async function likePost(postId) {
+
+      const button =
+        document.getElementById(
+          `like-button-${postId}`
+        );
+
+
+      // Prevent repeated clicks
+
+      button.disabled = true;
+
+
+      const { error } =
+        await supabaseClient
+          .from('likes')
+          .insert([
+            {
+              post_id: postId
+            }
+          ]);
+
+
+      if (error) {
+
+        console.error(
+          'Like error:',
+          error
+        );
+
+        alert(
+          'Unable to like this post.\n\n' +
+          error.message
+        );
+
+        button.disabled = false;
+
+        return;
+      }
+
+
+      // Remember that this browser liked it
+
+      localStorage.setItem(
+        `liked-${postId}`,
+        'true'
+      );
+
+
+      button.classList.add('liked');
+
+      button.innerHTML =
+        '❤️ Liked ' +
+        `<span id="like-count-${postId}"></span>`;
+
+
+      button.disabled = false;
+
+
+      await loadLikeCount(postId);
+
+    }
+
+
+    // ==========================================
+    // CHECK IF THIS BROWSER LIKED
+    // ==========================================
+
+    function checkIfLiked(postId) {
+
+      const button =
+        document.getElementById(
+          `like-button-${postId}`
+        );
+
+      if (!button) {
+        return;
+      }
+
+
+      const alreadyLiked =
+        localStorage.getItem(
+          `liked-${postId}`
+        );
+
+
+      if (alreadyLiked === 'true') {
+
+        button.classList.add('liked');
+
+        button.innerHTML =
+          '❤️ Liked ' +
+          `<span id="like-count-${postId}"></span>`;
+
+      }
 
     }
 
