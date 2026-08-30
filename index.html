@@ -312,13 +312,14 @@
                   onkeydown="handleCommentKey(event, '${post.id}')"
                 >
 
-                <button
-                  id="comment-button-${post.id}"
-                  onclick="createComment('${post.id}')">
+<button
+  type="button"
+  class="comment-button"
+  data-post-id="${post.id}">
 
-                  Comment
+  Comment
 
-                </button>
+</button>
 
               </div>
 
