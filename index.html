@@ -19,15 +19,20 @@
         </div>
       </div>
 
-      <div class="account-wrap" id="accountWrap" style="display:none;">
-        <button class="account-button" type="button" onclick="toggleAccountMenu()" aria-label="Account menu">
-          <span class="account-avatar" id="accountAvatar">?</span>
-          <span class="account-name" id="accountName">Member</span>
-          <span aria-hidden="true">⌄</span>
-        </button>
-        <div class="account-menu" id="accountMenu">
-          <button class="menu-item" type="button" onclick="openMyProfile()">My Profile</button>
-          <button class="menu-item" type="button" onclick="signOut()">Sign Out</button>
+      <div class="header-actions" id="memberHeaderActions" style="display:none;">
+        <button class="notification-button" id="notificationButton" type="button" onclick="openNotifications()" aria-label="Notifications">🔔<span class="badge" id="notificationBadge" style="display:none;">0</span></button>
+        <div class="account-wrap" id="accountWrap">
+          <button class="account-button" type="button" onclick="toggleAccountMenu()" aria-label="Account menu">
+            <span class="account-avatar" id="accountAvatar">?</span>
+            <span class="account-name" id="accountName">Member</span>
+            <span aria-hidden="true">⌄</span>
+          </button>
+          <div class="account-menu" id="accountMenu">
+            <button class="menu-item" type="button" onclick="openMyProfile()">My Profile</button>
+            <button class="menu-item" type="button" onclick="openRules()">Community Guidelines</button>
+            <button class="menu-item admin-only" id="adminMenuItem" type="button" onclick="openAdminPanel()" style="display:none;">Admin Console</button>
+            <button class="menu-item" type="button" onclick="signOut()">Sign Out</button>
+          </div>
         </div>
       </div>
     </div>
@@ -45,27 +50,30 @@
       <section class="auth-card" id="authCard">
         <h2>Welcome</h2>
         <div class="muted">Sign in to enter the community, or create your member account.</div>
-
         <div class="auth-tabs">
           <button id="loginTab" class="auth-tab active" type="button" onclick="showLogin()">Sign In</button>
           <button id="signupTab" class="auth-tab" type="button" onclick="showSignup()">Create Account</button>
         </div>
-
         <div id="loginForm">
           <input id="loginEmail" class="input" type="email" placeholder="Email address" autocomplete="email">
           <input id="loginPassword" class="input" type="password" placeholder="Password" autocomplete="current-password">
           <button id="loginButton" class="primary auth-button" type="button" onclick="signIn()">Sign In</button>
         </div>
-
         <div id="signupForm" style="display:none;">
           <input id="signupName" class="input" type="text" maxlength="80" placeholder="Your full name" autocomplete="name">
           <input id="signupEmail" class="input" type="email" placeholder="Email address" autocomplete="email">
           <input id="signupPassword" class="input" type="password" placeholder="Create a password" autocomplete="new-password">
           <button id="signupButton" class="primary auth-button" type="button" onclick="signUp()">Create Account</button>
         </div>
-
         <div id="authMessage" class="message"></div>
       </section>
+    </section>
+
+    <section id="suspendedShell" class="suspended-card" style="display:none;">
+      <div class="guest-kicker">Account access restricted</div>
+      <h2>Your community access is currently paused.</h2>
+      <p>Please contact the NLC Community administrator if you believe this is a mistake.</p>
+      <button class="secondary" type="button" onclick="signOut()">Sign Out</button>
     </section>
 
     <section id="memberShell" style="display:none;">
@@ -76,6 +84,11 @@
           <p>Join the conversation, share something useful, or learn from what others are discussing.</p>
         </div>
       </section>
+
+      <div class="community-toolbar">
+        <div class="search-wrap"><span>⌕</span><input id="feedSearch" type="search" placeholder="Search conversations or members..." oninput="filterPosts()"></div>
+        <button class="secondary" type="button" onclick="openRules()">Guidelines</button>
+      </div>
 
       <section class="composer" id="composer">
         <div class="composer-head">
@@ -92,7 +105,7 @@
 
       <div class="feed-header">
         <h2>Community Feed</h2>
-        <div class="feed-label">Latest conversations</div>
+        <div class="feed-label" id="feedLabel">Latest conversations</div>
       </div>
       <div id="posts"></div>
     </section>
@@ -100,36 +113,78 @@
 
   <div class="modal-backdrop" id="editProfileModal" onclick="if(event.target===this)closeMyProfile()">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="editProfileTitle">
-      <div class="modal-head">
-        <h2 id="editProfileTitle">My Profile</h2>
-        <button class="icon-button" type="button" onclick="closeMyProfile()" aria-label="Close">×</button>
-      </div>
+      <div class="modal-head"><h2 id="editProfileTitle">My Profile</h2><button class="icon-button" type="button" onclick="closeMyProfile()">×</button></div>
       <div class="modal-body">
         <label class="profile-label" for="editProfileEmail">Email</label>
         <input id="editProfileEmail" class="input" type="email" readonly>
         <div class="muted" style="margin:-4px 0 14px;">Account email</div>
-
         <label class="profile-label" for="editProfileName">Full Name</label>
         <input id="editProfileName" class="input" type="text" maxlength="80" oninput="saveProfileDraft()">
-
         <label class="profile-label" for="editProfileBio">Bio <span style="font-weight:400;">(optional)</span></label>
         <textarea id="editProfileBio" class="profile-textarea" maxlength="300" placeholder="A short introduction about yourself..." oninput="saveProfileDraft()"></textarea>
-
-        <div class="profile-actions">
-          <div id="editProfileMessage" class="message"></div>
-          <button id="saveProfileButton" class="primary" type="button" onclick="saveProfile()">Save Changes</button>
-        </div>
+        <div class="profile-actions"><div id="editProfileMessage" class="message"></div><button id="saveProfileButton" class="primary" type="button" onclick="saveProfile()">Save Changes</button></div>
       </div>
     </div>
   </div>
 
   <div class="modal-backdrop" id="memberProfileModal" onclick="if(event.target===this)closeMemberProfile()">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="memberProfileTitle">
-      <div class="modal-head">
-        <h2 id="memberProfileTitle">Member Profile</h2>
-        <button class="icon-button" type="button" onclick="closeMemberProfile()" aria-label="Close">×</button>
-      </div>
+      <div class="modal-head"><h2 id="memberProfileTitle">Member Profile</h2><button class="icon-button" type="button" onclick="closeMemberProfile()">×</button></div>
       <div class="modal-body" id="memberProfileBody"></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="editContentModal" onclick="if(event.target===this)closeEditContent()">
+    <div class="modal small-modal" role="dialog" aria-modal="true">
+      <div class="modal-head"><h2 id="editContentTitle">Edit</h2><button class="icon-button" type="button" onclick="closeEditContent()">×</button></div>
+      <div class="modal-body">
+        <textarea id="editContentText" class="profile-textarea" maxlength="3000"></textarea>
+        <div class="profile-actions"><div id="editContentMessage" class="message"></div><button class="primary" type="button" onclick="saveEditedContent()">Save</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="reportModal" onclick="if(event.target===this)closeReport()">
+    <div class="modal small-modal" role="dialog" aria-modal="true">
+      <div class="modal-head"><h2>Report Content</h2><button class="icon-button" type="button" onclick="closeReport()">×</button></div>
+      <div class="modal-body">
+        <p class="muted">Tell the admin why this content needs review. Reports are private.</p>
+        <textarea id="reportReason" class="profile-textarea" maxlength="500" placeholder="Reason for reporting..."></textarea>
+        <div class="profile-actions"><div id="reportMessage" class="message"></div><button class="primary danger-soft" type="button" onclick="submitReport()">Submit Report</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="notificationsModal" onclick="if(event.target===this)closeNotifications()">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modal-head"><h2>Notifications</h2><div class="modal-head-actions"><button class="text-button" type="button" onclick="markAllNotificationsRead()">Mark all read</button><button class="icon-button" type="button" onclick="closeNotifications()">×</button></div></div>
+      <div class="modal-body" id="notificationsBody"></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="rulesModal" onclick="if(event.target===this)closeRules()">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modal-head"><h2>Community Guidelines</h2><button class="icon-button" type="button" onclick="closeRules()">×</button></div>
+      <div class="modal-body rules-content">
+        <p><strong>Keep conversations beneficial.</strong> Share useful ideas, questions, experiences and resources.</p>
+        <p><strong>Be respectful.</strong> Disagreement is fine; personal attacks, ridicule, harassment and abusive language are not.</p>
+        <p><strong>Protect privacy.</strong> Do not share another person's private information, screenshots or personal stories without permission.</p>
+        <p><strong>Avoid spam and self-promotion.</strong> Relevant recommendations are welcome; repetitive promotion is not.</p>
+        <p><strong>Use reporting responsibly.</strong> Report content that genuinely needs moderator attention.</p>
+        <p class="muted">NLC Community administrators may remove content or restrict access where necessary to protect the community.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="adminModal" onclick="if(event.target===this)closeAdminPanel()">
+    <div class="modal admin-modal" role="dialog" aria-modal="true">
+      <div class="modal-head"><h2>Admin Console</h2><button class="icon-button" type="button" onclick="closeAdminPanel()">×</button></div>
+      <div class="modal-body">
+        <div class="admin-stats" id="adminStats"></div>
+        <div class="admin-tabs"><button class="auth-tab active" id="reportsTab" type="button" onclick="showAdminTab('reports')">Reports</button><button class="auth-tab" id="membersTab" type="button" onclick="showAdminTab('members')">Members</button></div>
+        <div id="adminReports"></div>
+        <div id="adminMembers" style="display:none;"></div>
+      </div>
     </div>
   </div>
 
