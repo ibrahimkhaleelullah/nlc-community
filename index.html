@@ -4,19 +4,103 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NLC Community</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f5f6f7;
+    }
+
+    h1 {
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    .post {
+      background: white;
+      padding: 20px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    .post-date {
+      font-size: 12px;
+      color: #888;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 
 <body>
 
   <h1>NLC Community</h1>
-
-  <p>A place to learn, share and connect.</p>
-
-  <hr>
+  <div class="subtitle">A place to learn, share and connect.</div>
 
   <h2>Community Feed</h2>
 
-  <p>Our community is coming soon.</p>
+  <div id="posts">
+    Loading posts...
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://zbogfymmlnifzoasemlt.supabase.co';
+
+    const SUPABASE_KEY = 'PASTE_YOUR_PUBLISHABLE_KEY_HERE';
+
+    const supabaseClient = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+    async function loadPosts() {
+      const { data, error } = await supabaseClient
+        .from('posts')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        document.getElementById('posts').innerHTML =
+          '<p>Unable to load posts.</p>';
+
+        console.error(error);
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        document.getElementById('posts').innerHTML =
+          '<p>No posts yet. Be the first to share something!</p>';
+
+        return;
+      }
+
+      document.getElementById('posts').innerHTML = data.map(post => `
+        <div class="post">
+          <div>${escapeHtml(post.content)}</div>
+          <div class="post-date">
+            ${new Date(post.created_at).toLocaleString()}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    loadPosts();
+  </script>
 
 </body>
 </html>
