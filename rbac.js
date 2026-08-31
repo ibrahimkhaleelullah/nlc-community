@@ -46,3 +46,6 @@ async function resolveReport(id,status){const{error}=await supabaseClient.rpc('r
 
 // Keep the admin entry and role-specific tabs aligned with the signed-in profile.
 setInterval(()=>{if(!currentUser)return;const menu=$('adminMenuItem');if(menu)menu.style.display=isTeam()?'block':'none';const team=$('teamTab'),audit=$('auditTab'),members=$('membersTab');if(team)team.style.display=isOwner()?'inline-block':'none';if(audit)audit.style.display=isAdmin()?'inline-block':'none';if(members)members.style.display=isAdmin()?'inline-block':'none'},500);
+
+// Load the membership approval extension after the RBAC helpers are available.
+(()=>{const s=document.createElement('script');s.src='membership-approval.js';s.defer=true;document.body.appendChild(s)})();
