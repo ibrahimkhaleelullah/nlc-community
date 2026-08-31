@@ -1,6 +1,34 @@
 // Membership approval workflow: Pending -> Active -> Declined.
 // Loaded after app.js and rbac.js so it can extend the existing UI safely.
 
+(function injectMembershipApprovalUI(){
+ const main=document.querySelector('main.container');
+ const memberShell=$('memberShell');
+ if(main&&memberShell&&!$('pendingShell')){
+  const pending=document.createElement('section');
+  pending.id='pendingShell';pending.className='suspended-card';pending.style.display='none';
+  pending.innerHTML='<div class="guest-kicker">Membership under review</div><h2>Your registration has been received.</h2><p>Your membership is currently pending review by the NLC team. You will be able to enter the community once your membership is approved.</p><p class="muted">You may leave this page and sign in again later to check your status.</p><button class="secondary" onclick="signOut()">Sign Out</button>';
+  main.insertBefore(pending,memberShell);
+ }
+ if(main&&memberShell&&!$('declinedShell')){
+  const declined=document.createElement('section');
+  declined.id='declinedShell';declined.className='suspended-card';declined.style.display='none';
+  declined.innerHTML='<div class="guest-kicker">Membership review complete</div><h2>Your community membership was not approved at this time.</h2><p>Please contact the NLC Community administrator if you would like clarification or believe this was a mistake.</p><button class="secondary" onclick="signOut()">Sign Out</button>';
+  main.insertBefore(declined,memberShell);
+ }
+ const tabs=document.querySelector('.admin-tabs');
+ const reportsTab=$('reportsTab');
+ if(tabs&&reportsTab&&!$('approvalsTab')){
+  const b=document.createElement('button');
+  b.className='auth-tab';b.id='approvalsTab';b.type='button';b.textContent='Pending Approvals';b.onclick=()=>showAdminTab('approvals');
+  tabs.insertBefore(b,reportsTab);
+ }
+ const reports=$('adminReports');
+ if(reports&&!$('adminApprovals')){
+  const box=document.createElement('div');box.id='adminApprovals';box.style.display='none';reports.parentNode.insertBefore(box,reports);
+ }
+})();
+
 const membershipIsActive=()=>currentProfile?.membership_status==='active';
 const membershipIsPending=()=>currentProfile?.membership_status==='pending';
 const membershipIsDeclined=()=>currentProfile?.membership_status==='declined';
